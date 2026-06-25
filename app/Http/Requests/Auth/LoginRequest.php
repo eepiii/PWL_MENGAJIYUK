@@ -27,12 +27,21 @@ class LoginRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
-        ];
+    return [
+        'email' => ['required', 'string', 'email', 'max:255'],
+        'password' => ['required', 'string', 'min:6'],
+    ];
     }
 
+    public function messages(): array
+{
+    return [
+        'email.required' => 'Email wajib diisi.',
+        'email.email' => 'Format email tidak valid.',
+        'password.required' => 'Password wajib diisi.',
+        'password.min' => 'Password minimal 6 karakter.',
+    ];
+}
     /**
      * Attempt to authenticate the request's credentials.
      *
