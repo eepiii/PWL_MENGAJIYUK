@@ -1,9 +1,8 @@
 <?php
 
-use App\Http\Controllers\ProfileController; // <-- TAMBAHKAN INI
+use App\Http\Controllers\ProfileController; 
 use App\Http\Controllers\QuranController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\QuranController;
 
 /*
 |--------------------------------------------------------------------------
