@@ -10,10 +10,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Halaman Dashboard (Harus Login)
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/quran', [QuranController::class, 'index']);
 
 
 
