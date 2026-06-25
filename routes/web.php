@@ -1,16 +1,11 @@
 <?php
 
-use App\Http\Controllers\ProfileController; // <-- TAMBAHKAN INI
+use App\Http\Controllers\ProfileController; 
 use App\Http\Controllers\QuranController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
 
-// Halaman Utama (Landing Page)
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -21,9 +16,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 
-// ==========================================
-// AREA FITUR APLIKASI (Hanya yang sudah Login)
-// ==========================================
+
 Route::middleware('auth')->group(function () {
 
     // ROUTES PROFIL BAWAAN BREEZE (Wajib ada agar tidak error)
