@@ -26,12 +26,12 @@ class LoginRequest extends FormRequest
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
-    {
+{
     return [
         'email' => ['required', 'string', 'email', 'max:255'],
         'password' => ['required', 'string', 'min:6'],
     ];
-    }
+}
 
     public function messages(): array
 {
