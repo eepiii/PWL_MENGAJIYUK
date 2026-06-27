@@ -14,7 +14,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// INI DIA YANG HILANG: Route Dashboard
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
