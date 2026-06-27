@@ -8,7 +8,7 @@
 <body>
 
     <h1>
-        📖 Surah {{ $surah['namaLatin'] }}
+        Surah {{ $surah['namaLatin'] }}
         ({{ $surah['nama'] }})
     </h1>
 
