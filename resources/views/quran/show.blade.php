@@ -57,7 +57,7 @@
                                     <p style="color: #2e7d32; font-style: italic; font-size: 14px; margin-bottom: 8px; font-weight: 500;">
                                         {{ $ayat['teksLatin'] }}
                                     </p>
-                                    <p style="color: #444; font-size: 15px; margin-bottom: 0; line-height: 1.7; font-weight: normal;">
+                                    <p style="color: #444; font-size: 15px; margin-bottom: 0; line-height: 1.7;">
                                         {{ $ayat['teksIndonesia'] }}
                                     </p>
                                 </div>
