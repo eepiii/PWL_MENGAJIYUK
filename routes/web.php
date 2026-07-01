@@ -4,13 +4,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuranController;
 use App\Http\Controllers\HafalanSetoranController; 
 use App\Http\Controllers\NilaiHafalanController;   
+use App\Http\Controllers\JurnalIbadahController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
 
 Route::get('/', function () {
     return view('welcome');
@@ -41,6 +37,11 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['role:guru'])->group(function () {
         Route::get('/penilaian', [NilaiHafalanController::class, 'index'])->name('penilaian.index');
         Route::post('/penilaian/{id}', [NilaiHafalanController::class, 'store'])->name('penilaian.store');
+
+    Route::middleware(['auth'])->group(function () {
+    Route::get('/jurnal', [JurnalIbadahController::class, 'index'])->name('jurnal.index');
+    Route::post('/jurnal', [JurnalIbadahController::class, 'store'])->name('jurnal.store');
+    });
     });
 });
 

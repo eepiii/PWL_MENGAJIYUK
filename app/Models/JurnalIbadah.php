@@ -27,11 +27,9 @@ class JurnalIbadah extends Model
         'tilawah_halaman' => 'integer',
     ];
 
-
-    const SHALAT_TIDAK    = 0;
-    const SHALAT_TEPAT    = 1;
-    const SHALAT_QADHA    = 2;
-
+    public const SHALAT_TIDAK    = 0;
+    public const SHALAT_TEPAT    = 1;
+    public const SHALAT_QADHA    = 2;
 
     public function santri()
     {
