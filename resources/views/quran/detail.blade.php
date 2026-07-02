@@ -3,7 +3,10 @@ Oalah, begitu maksudmu! Jadi kamu mau di dalam card ayat itu ada **dua mode inte
 1. **Mode Recitation (Membaca/Menghafal):** Santri pencet tombol mic, lalu melafalkan ayatnya, dan sistem akan mencocokkan teks suaranya dengan ayat Al-Qur'an tersebut.
 2. **Mode Listening (Mendengarkan):** Santri bisa memutar audio/murottal dari Sheikh langsung dari API per ayatnya (ikon speaker/sound).
 
-Biar bener-bener canggih, kita tambahkan fitur **audio murottal otomatis per ayat** menggunakan API publik Kemenag/Quran.com (biasanya field `$ayat['audio']` sudah ada di return API data Qur'an kamu, atau kita pakai fallback URL cadangan).
+    <h1>
+        Surah {{ $surah['namaLatin'] }}
+        ({{ $surah['nama'] }})
+    </h1>
 
 Yuk, ganti isi file `detail.blade.php` kamu dengan kode terlengkap ini. Tampilannya horizontal rapi seperti webmu tapi fiturnya kembar dengan Ngaji.ai!
 

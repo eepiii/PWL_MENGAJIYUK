@@ -1,45 +1,13 @@
 @extends('layouts.app')
 
-@section('content')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-<div class="container" style="margin-top: 30px; margin-bottom: 50px; max-width: 1140px; font-family: 'Segoe UI', Arial, sans-serif;">
-    
-    <div class="text-center" style="background-color: #0f5132; color: white; border-radius: 12px; padding: 50px 20px; margin-bottom: 40px; box-shadow: 0 4px 15px rgba(15,81,50,0.1);">
-        <h1 style="font-size: 38px; font-weight: bold; margin-bottom: 15px; font-family: 'Georgia', serif;">
-            Selamat Datang di MengajiYuk!
-        </h1>
-        <p style="font-size: 16px; opacity: 0.9; max-width: 700px; margin: 0 auto 25px auto; line-height: 1.6;">
-            Platform digital pendukung hafalan santri, jurnal ibadah, dan pembelajaran Al-Qur'an interaktif.
-        </p>
-        <a href="/quran" class="btn" style="background-color: #e67e22; color: white; font-weight: bold; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-size: 15px; display: inline-block; transition: all 0.2s; box-shadow: 0 4px 10px rgba(230,126,34,0.2);">
-            <i class="fa-solid fa-book-open" style="margin-right: 8px;"></i> Mulai Baca Al-Qur'an
-        </a>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px;">
-        
-        <div class="card-menu" style="background: white; border: 1px solid #eef2f5; border-radius: 12px; padding: 35px 25px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; min-height: 280px;">
-            <div>
-                <div style="color: #0f5132; font-size: 40px; margin-bottom: 15px;">
-                    <i class="fa-solid fa-book-quran"></i>
-                </div>
-                <h3 style="font-weight: bold; color: #222; margin: 0 0 10px 0; font-size: 20px;">Al-Qur'an Digital</h3>
-                <p style="color: #666; font-size: 14px; line-height: 1.6; margin: 0 0 20px 0;">
-                    Baca Al-Qur'an lengkap dengan teks Arab, transliterasi latin, dan terjemahan bahasa Indonesia resmi.
-                </p>
-            </div>
-            <div>
-                <a href="/quran" class="btn" style="border: 1px solid #ccc; background: white; color: #333; font-weight: bold; padding: 8px 24px; border-radius: 6px; text-decoration: none; font-size: 13px; display: inline-block;">
-                    Buka Qur'an
-                </a>
-            </div>
-        </div>
-
-        <div class="card-menu" style="background: white; border: 1px solid #eef2f5; border-radius: 12px; padding: 35px 25px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; min-height: 280px;">
-            <div>
-                <div style="color: #f39c12; font-size: 40px; margin-bottom: 15px;">
-                    <i class="fa-solid fa-microphone"></i>
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            
+            <!-- 1. Kotak Ucapan Selamat Datang -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border-l-4 border-indigo-500">
+                <div class="p-6 text-gray-900 text-lg">
+                    Assalamu'alaikum, <strong>{{ Auth::user()->name }}</strong>! <br>
+                    Anda masuk menggunakan akun <span class="uppercase font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded">{{ Auth::user()->getRoleNames()->first() }}</span>.
                 </div>
                 <h3 style="font-weight: bold; color: #222; margin: 0 0 10px 0; font-size: 20px;">Setoran Hafalan</h3>
                 <p style="color: #666; font-size: 14px; line-height: 1.6; margin: 0 0 20px 0;">
@@ -68,9 +36,38 @@
                     Isi Jurnal
                 </a>
             </div>
+
+            <!-- 2. Menu Navigasi Cepat (Grid) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Menu Baca Al-Qur'an (Bisa dilihat Semua Role) -->
+                <a href="{{ route('quran.index') }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition">
+                    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900">📖 Baca Al-Qur'an</h5>
+                    <p class="font-normal text-gray-600">Akses daftar 114 Surah dan baca ayat suci Al-Qur'an di sini.</p>
+                </a>
+
+                <!-- Menu Khusus Santri (Hanya muncul jika yang login adalah Santri) -->
+                @role('santri')
+                <a href="#" class="block p-6 bg-blue-50 border border-blue-200 rounded-lg shadow-sm hover:shadow-md hover:bg-blue-100 transition">
+                    <h5 class="mb-2 text-2xl font-bold tracking-tight text-blue-900">🎤 Setor Hafalan</h5>
+                    <p class="font-normal text-blue-700">Kirim jadwal atau hasil setoran hafalan baru Anda kepada guru.</p>
+                </a>
+                @endrole
+
+                <!-- Menu Khusus Guru (Hanya muncul jika yang login adalah Guru) -->
+                @role('guru')
+                <a href="{{ route('penilaian.index') }}" class="block p-6 bg-green-50 border border-green-200 rounded-lg shadow-sm hover:shadow-md hover:bg-green-100 transition">
+                    <h5 class="mb-2 text-2xl font-bold tracking-tight text-green-900">📝 Penilaian Setoran</h5>
+                    <p class="font-normal text-green-700">Periksa, dengarkan, dan beri nilai pada setoran hafalan santri.</p>
+                </a>
+                @endrole
+                
+            </div>
+
         </div>
 
     </div>
+</x-app-layout>
 </div>
 
 <style>
