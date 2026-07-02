@@ -15,7 +15,7 @@
 
     <div class="max-w-4xl mx-auto px-4 py-8">
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-emerald-600 mb-2">📖 Quran Reader</h1>
+            <h1 class="text-3xl font-bold text-emerald-600 mb-2">Quran Reader</h1>
             <p class="text-gray-600">Fitur membaca Al-Qur'an digital untuk mendukung setoran hafalan santri.</p>
         </div>
 
