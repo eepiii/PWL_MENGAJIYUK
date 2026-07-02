@@ -42,10 +42,17 @@ class JurnalIbadahController extends Controller
         $jadwalShalat = null;
         
         try {
+<<<<<<< Updated upstream
             $response = Http::withoutVerifying()->get("https://equran.id/api/v2/shalat/jadwal/{$idKota}/{$tahun}/{$bulan}");
             
             if ($response->successful()) {
                 $data = $response->json('data.jadwal');
+=======
+            $response = Http::get("https://equran.id/api/v2/shalat/jadwal/{$idKota}/{$tahun}/{$bulan}");
+            
+            if ($response->successful()) {
+                $data = $response->json('data');
+>>>>>>> Stashed changes
                 $jadwalShalat = collect($data)->firstWhere('date', $hari);
             }
         } catch (\Exception $e) {
