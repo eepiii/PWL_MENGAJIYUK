@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController; 
+use App\Http\Controllers\HafalanSetoranController;
 use App\Http\Controllers\QuranController;
 use Illuminate\Support\Facades\Route;
 
@@ -37,6 +38,12 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['role:guru'])->group(function () {
         // Route::get('/penilaian', [PenilaianController::class, 'index'])->name('penilaian.index');
         // Route::post('/penilaian/{id}', [PenilaianController::class, 'store'])->name('penilaian.store');
+    });
+
+    Route::middleware(['auth'])->group(function () {
+    Route::get('/setoran', [HafalanSetoranController::class, 'create'])->name('setoran.create');
+    Route::post('/setoran', [HafalanSetoranController::class, 'store'])->name('setoran.store');
+    Route::get('/setoran/riwayat', [HafalanSetoranController::class, 'index'])->name('setoran.index');
     });
 
 });
