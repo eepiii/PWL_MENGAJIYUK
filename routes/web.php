@@ -41,10 +41,24 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware(['auth'])->group(function () {
-    Route::get('/setoran', [HafalanSetoranController::class, 'create'])->name('setoran.create');
-    Route::post('/setoran', [HafalanSetoranController::class, 'store'])->name('setoran.store');
-    Route::get('/setoran/riwayat', [HafalanSetoranController::class, 'index'])->name('setoran.index');
+
+    // SANTRI: hanya bisa menyetor + lihat riwayat + chart progress
+    Route::middleware(['role:santri'])->group(function () {
+        Route::get('/setoran/create', [HafalanSetoranController::class, 'create'])->name('setoran.create');
+        Route::post('/setoran', [HafalanSetoranController::class, 'store'])->name('setoran.store');
+        Route::get('/setoran/progress', [HafalanSetoranController::class, 'progress'])->name('setoran.progress');
     });
+
+    // GURU: hanya lihat riwayat semua santri + menilai
+    Route::middleware(['role:guru'])->group(function () {
+        Route::get('/setoran/{setoran}/nilai/create', [NilaiHafalanController::class, 'create'])->name('nilai.create');
+        Route::post('/setoran/{setoran}/nilai', [NilaiHafalanController::class, 'store'])->name('nilai.store');
+    });
+
+    // INDEX riwayat bisa diakses guru & santri (logic filter di controller, seperti kode existing)
+    Route::get('/setoran', [HafalanSetoranController::class, 'index'])->name('setoran.index');
+    Route::get('/setoran/{setoran}', [HafalanSetoranController::class, 'show'])->name('setoran.show');
+});
 
 });
 
