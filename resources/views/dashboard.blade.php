@@ -1,9 +1,4 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
+@extends('layouts.app')
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
@@ -14,6 +9,32 @@
                     Assalamu'alaikum, <strong>{{ Auth::user()->name }}</strong>! <br>
                     Anda masuk menggunakan akun <span class="uppercase font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded">{{ Auth::user()->getRoleNames()->first() }}</span>.
                 </div>
+                <h3 style="font-weight: bold; color: #222; margin: 0 0 10px 0; font-size: 20px;">Setoran Hafalan</h3>
+                <p style="color: #666; font-size: 14px; line-height: 1.6; margin: 0 0 20px 0;">
+                    Rekam dan setor hafalan ayat Al-Qur'an kamu secara mandiri untuk dikoreksi oleh Ustadz pembimbing.
+                </p>
+            </div>
+            <div>
+                <a href="/setoran-hafalan" class="btn" style="border: 1px solid #ccc; background: white; color: #333; font-weight: bold; padding: 8px 24px; border-radius: 6px; text-decoration: none; font-size: 13px; display: inline-block;">
+                    Mulai Setoran
+                </a>
+            </div>
+        </div>
+
+        <div class="card-menu" style="background: white; border: 1px solid #eef2f5; border-radius: 12px; padding: 35px 25px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; min-height: 280px;">
+            <div>
+                <div style="color: #2b6cb0; font-size: 40px; margin-bottom: 15px;">
+                    <i class="fa-solid fa-calendar-check"></i>
+                </div>
+                <h3 style="font-weight: bold; color: #222; margin: 0 0 10px 0; font-size: 20px;">Jurnal Ibadah</h3>
+                <p style="color: #666; font-size: 14px; line-height: 1.6; margin: 0 0 20px 0;">
+                    Catat perkembangan ibadah harianmu mulai dari shalat wajib, sunnah, hingga target tilawah harian.
+                </p>
+            </div>
+            <div>
+                <a href="/jurnal" class="btn" style="border: 1px solid #ccc; background: white; color: #333; font-weight: bold; padding: 8px 24px; border-radius: 6px; text-decoration: none; font-size: 13px; display: inline-block;">
+                    Isi Jurnal
+                </a>
             </div>
 
             <!-- 2. Menu Navigasi Cepat (Grid) -->
@@ -44,5 +65,23 @@
             </div>
 
         </div>
+
     </div>
 </x-app-layout>
+</div>
+
+<style>
+    /* Efek hover interaktif tipis biar makin mirip web professional */
+    .card-menu {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card-menu:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.06) !important;
+    }
+    .card-menu a:hover {
+        background-color: #f8f9fa !important;
+        border-color: #adadad !important;
+    }
+</style>
+@endsection
