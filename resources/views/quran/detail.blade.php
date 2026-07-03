@@ -1,16 +1,3 @@
-Oalah, begitu maksudmu! Jadi kamu mau di dalam card ayat itu ada **dua mode interaktif sekalian**, mirip fitur komplitnya Ngaji.ai:
-
-1. **Mode Recitation (Membaca/Menghafal):** Santri pencet tombol mic, lalu melafalkan ayatnya, dan sistem akan mencocokkan teks suaranya dengan ayat Al-Qur'an tersebut.
-2. **Mode Listening (Mendengarkan):** Santri bisa memutar audio/murottal dari Sheikh langsung dari API per ayatnya (ikon speaker/sound).
-
-    <h1>
-        Surah {{ $surah['namaLatin'] }}
-        ({{ $surah['nama'] }})
-    </h1>
-
-Yuk, ganti isi file `detail.blade.php` kamu dengan kode terlengkap ini. Tampilannya horizontal rapi seperti webmu tapi fiturnya kembar dengan Ngaji.ai!
-
-```html
 @extends('layouts.app')
 
 @section('content')
@@ -292,5 +279,3 @@ Yuk, ganti isi file `detail.blade.php` kamu dengan kode terlengkap ini. Tampilan
     .btn-audio-listening:hover { transform: scale(1.1); border-color: #e67e22 !important; }
 </style>
 @endsection
-
-```

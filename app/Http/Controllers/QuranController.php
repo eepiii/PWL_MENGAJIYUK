@@ -7,36 +7,34 @@ use Illuminate\Support\Facades\Http;
 
 class QuranController extends Controller
 {
-    // Halaman Utama Daftar Surah
+    // 1. Menampilkan Daftar Surah
     public function index()
     {
         $response = Http::get('https://equran.id/api/v2/surat');
+        
+        // Pastikan response sukses
+        $surah = [];
+        if ($response->successful()) {
+            // Gunakan json_decode(json_encode) untuk memaksa data jadi Object
+            $surah = json_decode(json_encode($response->json()['data']));
+        }
 
-        $surah = $response->json()['data'];
-        $surahs = \App\Models\Surah::all();
-
-        return view('quran.index', compact('surahs'));
+        return view('quran.index', compact('surah'));
     }
     
-    public function show($nomor_surah)
-    {
-        // Mengambil detail surah beserta ayatnya dari API
-        $response = \Illuminate\Support\Facades\Http::get('https://equran.id/api/v2/surat/' . $nomor_surah);
-        $surah = json_decode($response->body())->data;
-
-        // Mengirim data ke halaman view detail
-        return view('quran.show', compact('surah'));
-    }
-
-
-    // Mengganti nama fungsi jadi 'show' agar pas dengan route dan view show.blade.php kita
+    // 2. Menampilkan Detail Surah
     public function show($nomor)
     {
         $response = Http::get("https://equran.id/api/v2/surat/$nomor");
+        
+        $surah = null;
+        if ($response->successful()) {
+            // Memaksa data jadi Object
+            $surah = json_decode(json_encode($response->json()['data']));
+        } else {
+            abort(404, 'Surah tidak ditemukan');
+        }
 
-        // Variabel diganti jadi $detailSurat agar pas dengan file show.blade.php
-        $detailSurat = $response->json()['data'];
-
-        return view('quran.show', compact('detailSurat'));
+        return view('quran.show', compact('surah'));
     }
 }
