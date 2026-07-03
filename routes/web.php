@@ -32,14 +32,25 @@ Route::middleware('auth')->group(function () {
     Route::get('/setoran/{setoran}', [HafalanSetoranController::class, 'show'])->name('setoran.show');
 
     // --- FITUR KHUSUS SANTRI ---
-    Route::middleware(['role:santri'])->group(function () {
+    // Menggunakan check kondisi biasa agar tidak bergantung pada package Spatie yang belum di-migrate
+    Route::middleware(function ($request, $next) {
+        if (auth()->user()->role !== 'santri') {
+            abort(403, 'Unauthorized action.');
+        }
+        return $next($request);
+    })->group(function () {
         Route::get('/setoran/create', [HafalanSetoranController::class, 'create'])->name('setoran.create');
         Route::post('/setoran', [HafalanSetoranController::class, 'store'])->name('setoran.store');
         Route::get('/setoran/progress', [HafalanSetoranController::class, 'progress'])->name('setoran.progress');
     });
 
     // --- FITUR KHUSUS GURU ---
-    Route::middleware(['role:guru'])->group(function () {
+    Route::middleware(function ($request, $next) {
+        if (auth()->user()->role !== 'guru') {
+            abort(403, 'Unauthorized action.');
+        }
+        return $next($request);
+    })->group(function () {
         Route::get('/penilaian', [NilaiHafalanController::class, 'index'])->name('penilaian.index');
         Route::post('/penilaian/{id}', [NilaiHafalanController::class, 'store'])->name('penilaian.store');
         
@@ -47,6 +58,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/setoran/{setoran}/nilai', [NilaiHafalanController::class, 'store'])->name('nilai.store');
     });
 
-}); // <-- Ini dia kurung penutup middleware auth yang tadi hilang!
+}); 
 
-require __DIR__.'/auth.php'; // <-- Ini juga sudah diperbaiki pakai double underscore
+require __DIR__.'/auth.php';
