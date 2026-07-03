@@ -7,21 +7,34 @@ use Illuminate\Support\Facades\Http;
 
 class QuranController extends Controller
 {
+    // 1. Menampilkan Daftar Surah
     public function index()
     {
         $response = Http::get('https://equran.id/api/v2/surat');
-
-        $surah = $response->json()['data'];
+        
+        // Pastikan response sukses
+        $surah = [];
+        if ($response->successful()) {
+            // Gunakan json_decode(json_encode) untuk memaksa data jadi Object
+            $surah = json_decode(json_encode($response->json()['data']));
+        }
 
         return view('quran.index', compact('surah'));
     }
-
-    public function detail($nomor)
+    
+    // 2. Menampilkan Detail Surah
+    public function show($nomor)
     {
         $response = Http::get("https://equran.id/api/v2/surat/$nomor");
+        
+        $surah = null;
+        if ($response->successful()) {
+            // Memaksa data jadi Object
+            $surah = json_decode(json_encode($response->json()['data']));
+        } else {
+            abort(404, 'Surah tidak ditemukan');
+        }
 
-        $surah = $response->json()['data'];
-
-        return view('quran.detail', compact('surah'));
+        return view('quran.show', compact('surah'));
     }
 }

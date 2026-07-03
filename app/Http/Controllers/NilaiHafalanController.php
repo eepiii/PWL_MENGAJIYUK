@@ -2,64 +2,65 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\nilai_hafalan;
+use App\Models\HafalanSetoran;
+use App\Models\NilaiHafalan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class NilaiHafalanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function create(HafalanSetoran $setoran)
     {
-        //
+        abort_unless(Auth::user()->role === 'guru', 403);
+
+        return view('nilai.create', compact('setoran'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(Request $request, HafalanSetoran $setoran)
     {
-        //
-    }
+        abort_unless(Auth::user()->role === 'guru', 403);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $validated = $request->validate([
+            'kelancaran' => 'required|integer|min:0|max:100',
+            'tajwid'     => 'required|integer|min:0|max:100',
+            'makhraj'    => 'required|integer|min:0|max:100',
+            'catatan'    => 'nullable|string',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(nilai_hafalan $nilai_hafalan)
-    {
-        //
-    }
+        $nilaiTotal = round(($validated['kelancaran'] + $validated['tajwid'] + $validated['makhraj']) / 3);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(nilai_hafalan $nilai_hafalan)
-    {
-        //
-    }
+        NilaiHafalan::create([
+            'hafalan_setoran_id' => $setoran->id,
+            'guru_id'  => Auth::id(),
+            'kelancaran' => $validated['kelancaran'],
+            'tajwid'     => $validated['tajwid'],
+            'makhraj'    => $validated['makhraj'],
+            'nilai_total'=> $nilaiTotal,
+            'catatan'    => $validated['catatan'] ?? null,
+        ]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, nilai_hafalan $nilai_hafalan)
-    {
-        //
-    }
+        $setoran->update(['status' => 'sudah_dinilai']);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(nilai_hafalan $nilai_hafalan)
-    {
-        //
+        return redirect()->route('setoran.index')->with('success', 'Penilaian berhasil disimpan.');
+
+        public function progress()
+{
+    abort_unless(Auth::user()->role === 'santri', 403);
+
+    $data = HafalanSetoran::where('santri_id', Auth::id())
+        ->with('nilaiHafalan')
+        ->whereHas('nilaiHafalan')
+        ->orderBy('tanggal_setoran')
+        ->get()
+        ->map(function ($setoran) {
+            return [
+                'tanggal' => $setoran->tanggal_setoran->format('d M'),
+                'surah'   => $setoran->surah,
+                'nilai'   => $setoran->nilaiHafalan->nilai_total,
+            ];
+        });
+
+    return view('setoran.progress', compact('data'));
+}
     }
 }
