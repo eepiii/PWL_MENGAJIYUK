@@ -7,58 +7,46 @@ use App\Http\Controllers\NilaiHafalanController;
 use App\Http\Controllers\JurnalIbadahController;
 use Illuminate\Support\Facades\Route;
 
-
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/quran', [QuranController::class, 'index']);
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-
+// Semua route di dalam sini wajib login (Auth)
 Route::middleware('auth')->group(function () {
 
+    // --- PROFILE ---
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // --- QURAN ---
     Route::get('/quran', [QuranController::class, 'index'])->name('quran.index');
     Route::get('/quran/{nomor_surah}', [QuranController::class, 'show'])->name('quran.show');
 
-    // 2. FITUR KHUSUS SANTRI (Spatie Role: santri)
-    Route::middleware(['role:santri'])->group(function () {
-        Route::get('/setoran', [HafalanSetoranController::class, 'index'])->name('setoran.index');
-        Route::get('/setoran/create', [HafalanSetoranController::class, 'create'])->name('setoran.create');
-        Route::post('/setoran', [HafalanSetoranController::class, 'store'])->name('setoran.store');
-    });
+    // --- ROUTE BERSAMA (Bisa diakses Guru & Santri) ---
+    Route::get('/setoran', [HafalanSetoranController::class, 'index'])->name('setoran.index');
+    Route::get('/setoran/{setoran}', [HafalanSetoranController::class, 'show'])->name('setoran.show');
 
-    // 3. FITUR KHUSUS GURU (Spatie Role: guru)
-    Route::middleware(['role:guru'])->group(function () {
-        Route::get('/penilaian', [NilaiHafalanController::class, 'index'])->name('penilaian.index');
-        Route::post('/penilaian/{id}', [NilaiHafalanController::class, 'store'])->name('penilaian.store');
-
-    Route::middleware(['auth'])->group(function () {
-
-    // SANTRI: hanya bisa menyetor + lihat riwayat + chart progress
+    // --- FITUR KHUSUS SANTRI ---
     Route::middleware(['role:santri'])->group(function () {
         Route::get('/setoran/create', [HafalanSetoranController::class, 'create'])->name('setoran.create');
         Route::post('/setoran', [HafalanSetoranController::class, 'store'])->name('setoran.store');
         Route::get('/setoran/progress', [HafalanSetoranController::class, 'progress'])->name('setoran.progress');
     });
 
-    // GURU: hanya lihat riwayat semua santri + menilai
+    // --- FITUR KHUSUS GURU ---
     Route::middleware(['role:guru'])->group(function () {
+        Route::get('/penilaian', [NilaiHafalanController::class, 'index'])->name('penilaian.index');
+        Route::post('/penilaian/{id}', [NilaiHafalanController::class, 'store'])->name('penilaian.store');
+        
         Route::get('/setoran/{setoran}/nilai/create', [NilaiHafalanController::class, 'create'])->name('nilai.create');
         Route::post('/setoran/{setoran}/nilai', [NilaiHafalanController::class, 'store'])->name('nilai.store');
     });
 
-    // INDEX riwayat bisa diakses guru & santri (logic filter di controller, seperti kode existing)
-    Route::get('/setoran', [HafalanSetoranController::class, 'index'])->name('setoran.index');
-    Route::get('/setoran/{setoran}', [HafalanSetoranController::class, 'show'])->name('setoran.show');
-});
+}); // <-- Ini dia kurung penutup middleware auth yang tadi hilang!
 
-});
-
-require __DIR__.'/auth.php';
+require __DIR__.'/auth.php'; // <-- Ini juga sudah diperbaiki pakai double underscore
