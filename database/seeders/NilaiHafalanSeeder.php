@@ -12,20 +12,38 @@ class NilaiHafalanSeeder extends Seeder
     public function run(): void
     {
         $guru = User::role('guru')->first();
-        if (!$guru) return;
+
+        if (!$guru) {
+            $this->command->warn('Tidak ada user dengan role guru, seeder dilewati.');
+            return;
+        }
 
         $setoranDinilai = HafalanSetoran::where('status', 'dinilai')->get();
 
+        if ($setoranDinilai->isEmpty()) {
+            $this->command->warn('Tidak ada setoran berstatus "dinilai", seeder dilewati.');
+            return;
+        }
+
         foreach ($setoranDinilai as $setoran) {
-            NilaiHafalan::create([
-                'setoran_id'   => $setoran->id,
-                'guru_id'      => $guru->id,
-                'santri_id'    => $setoran->santri_id,
-                'nilai'        => rand(65, 100),
-                'kategori'     => collect(['lancar', 'cukup', 'perlu_ulang'])->random(),
-                'catatan_guru' => 'Tingkatkan tajwid.',
-                'dinilai_at'   => now()->subDays(rand(1, 14)),
-            ]);
+            $kelancaran = rand(65, 100);
+            $tajwid     = rand(65, 100);
+            $makhraj    = rand(65, 100);
+            $nilaiTotal = (int) round(($kelancaran + $tajwid + $makhraj) / 3);
+
+            // Nama kolom di sini WAJIB sama persis dengan migration nilai_hafalans:
+            // hafalan_setoran_id, guru_id, kelancaran, tajwid, makhraj, nilai_total, catatan
+            NilaiHafalan::updateOrCreate(
+                ['hafalan_setoran_id' => $setoran->id],
+                [
+                    'guru_id'     => $guru->id,
+                    'kelancaran'  => $kelancaran,
+                    'tajwid'      => $tajwid,
+                    'makhraj'     => $makhraj,
+                    'nilai_total' => $nilaiTotal,
+                    'catatan'     => 'Tingkatkan tajwid.',
+                ]
+            );
         }
     }
 }
