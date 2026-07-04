@@ -12,7 +12,7 @@ class JurnalIbadah extends Model
         'santri_id',
         'tanggal',
         'shalat_subuh',
-        'shalat_dzuhur',
+        'shalat_dzuhur', 
         'shalat_ashar',
         'shalat_maghrib',
         'shalat_isya',

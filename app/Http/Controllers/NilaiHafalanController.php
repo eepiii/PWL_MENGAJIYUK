@@ -9,44 +9,61 @@ use Illuminate\Support\Facades\Auth;
 
 class NilaiHafalanController extends Controller
 {
-    // Menampilkan semua setoran santri yang masuk dan butuh nilai
-    public function index()
+    public function create(HafalanSetoran $setoran)
     {
-        $setorans = HafalanSetoran::with('santri', 'surah')
-            ->where('status', 'pending')
-            ->latest()
-            ->get();
+        abort_unless(Auth::user()->role === 'guru', 403);
 
-        return view('penilaian.index', compact('setorans'));
+        return view('nilai.create', compact('setoran'));
     }
 
-    // Menyimpan penilaian yang diberikan oleh guru
-    public function store(Request $request, $id)
+    public function store(Request $request, HafalanSetoran $setoran)
     {
-        $request->validate([
-            'nilai' => 'required|integer|between:0,100',
-            'kategori' => 'required|in:lancar,cukup,perlu_ulang',
-            'catatan_guru' => 'nullable|string',
+        abort_unless(Auth::user()->role === 'guru', 403);
+
+        $validated = $request->validate([
+            'kelancaran' => 'required|integer|min:0|max:100',
+            'tajwid'     => 'required|integer|min:0|max:100',
+            'makhraj'    => 'required|integer|min:0|max:100',
+            'catatan'    => 'nullable|string',
         ]);
 
-        $setoran = HafalanSetoran::findOrFail($id);
+        $nilaiTotal = round(
+            ($validated['kelancaran'] + $validated['tajwid'] + $validated['makhraj']) / 3
+        );
 
-        // 1. Simpan data ke tabel nilai_hafalans
         NilaiHafalan::create([
-            'setoran_id' => $setoran->id,
-            'guru_id' => Auth::id(),
-            'santri_id' => $setoran->santri_id,
-            'nilai' => $request->nilai,
-            'kategori' => $request->kategori,
-            'catatan_guru' => $request->catatan_guru,
-            'dinilai_at' => now(),
+            'hafalan_setoran_id' => $setoran->id,
+            'guru_id'            => Auth::id(),
+            'kelancaran'         => $validated['kelancaran'],
+            'tajwid'             => $validated['tajwid'],
+            'makhraj'            => $validated['makhraj'],
+            'nilai_total'        => $nilaiTotal,
+            'catatan'            => $validated['catatan'] ?? null,
         ]);
 
-        // 2. Ubah status di tabel hafalan_setorans menjadi 'dinilai'
-        $setoran->update([
-            'status' => 'dinilai'
-        ]);
+        $setoran->update(['status' => 'sudah_dinilai']);
 
-        return redirect()->route('penilaian.index')->with('success', 'Penilaian hafalan berhasil disimpan!');
+        return redirect()->route('setoran.index')
+            ->with('success', 'Penilaian berhasil disimpan.');
+    }
+
+    public function progress()
+    {
+        abort_unless(Auth::user()->role === 'santri', 403);
+
+        $data = HafalanSetoran::where('santri_id', Auth::id())
+            ->with('nilaiHafalan')
+            ->whereHas('nilaiHafalan')
+            ->orderBy('tanggal_setoran')
+            ->get()
+            ->map(function ($setoran) {
+                return [
+                    'tanggal' => $setoran->tanggal_setoran->format('d M'),
+                    'surah'   => $setoran->surah,
+                    'nilai'   => $setoran->nilaiHafalan->nilai_total,
+                ];
+            });
+
+        return view('setoran.progress', compact('data'));
     }
 }

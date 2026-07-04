@@ -6,24 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class HafalanSetoran extends Model
 {
-    protected $table = 'hafalan_setorans';
-
     protected $fillable = [
         'santri_id',
         'surah_id',
         'ayat_mulai',
         'ayat_selesai',
+        'audio_path',
+        'catatan',
         'status',
-        'catatan_santri',
-        'disetor_at',
     ];
-
-    protected $casts = [
-        'disetor_at'   => 'datetime',
-        'ayat_mulai'   => 'integer',
-        'ayat_selesai' => 'integer',
-    ];
-
 
     public function santri()
     {
@@ -32,37 +23,16 @@ class HafalanSetoran extends Model
 
     public function surah()
     {
-        return $this->belongsTo(Surah::class, 'surah_id');
+        return $this->belongsTo(Surah::class);
     }
 
     public function nilai()
     {
-        return $this->hasOne(NilaiHafalan::class, 'setoran_id');
+        return $this->hasOne(NilaiHafalan::class, 'hafalan_setoran_id');
     }
 
-
-    public function scopePending($query)
+    public function scopeMenunggu($query)
     {
-        return $query->where('status', 'pending');
-    }
-
-    public function scopeDinilai($query)
-    {
-        return $query->where('status', 'dinilai');
-    }
-
-    public function scopeMilikSantri($query, $santriId)
-    {
-        return $query->where('santri_id', $santriId);
-    }
-
-    public function jumlahAyat(): int
-    {
-        return ($this->ayat_selesai - $this->ayat_mulai) + 1;
-    }
-
-    public function sudahDinilai(): bool
-    {
-        return $this->status === 'dinilai';
+        return $query->where('status', 'menunggu');
     }
 }
