@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Http;
 
 class QuranController extends Controller
 {
-    // 1. Menampilkan Daftar Surah
     public function index()
     {
         $response = Http::get('https://equran.id/api/v2/surat');

@@ -27,40 +27,43 @@ class NilaiHafalanController extends Controller
             'catatan'    => 'nullable|string',
         ]);
 
-        $nilaiTotal = round(($validated['kelancaran'] + $validated['tajwid'] + $validated['makhraj']) / 3);
+        $nilaiTotal = round(
+            ($validated['kelancaran'] + $validated['tajwid'] + $validated['makhraj']) / 3
+        );
 
         NilaiHafalan::create([
             'hafalan_setoran_id' => $setoran->id,
-            'guru_id'  => Auth::id(),
-            'kelancaran' => $validated['kelancaran'],
-            'tajwid'     => $validated['tajwid'],
-            'makhraj'    => $validated['makhraj'],
-            'nilai_total'=> $nilaiTotal,
-            'catatan'    => $validated['catatan'] ?? null,
+            'guru_id'            => Auth::id(),
+            'kelancaran'         => $validated['kelancaran'],
+            'tajwid'             => $validated['tajwid'],
+            'makhraj'            => $validated['makhraj'],
+            'nilai_total'        => $nilaiTotal,
+            'catatan'            => $validated['catatan'] ?? null,
         ]);
 
         $setoran->update(['status' => 'sudah_dinilai']);
 
-        return redirect()->route('setoran.index')->with('success', 'Penilaian berhasil disimpan.');
+        return redirect()->route('setoran.index')
+            ->with('success', 'Penilaian berhasil disimpan.');
+    }
 
-        public function progress()
-{
-    abort_unless(Auth::user()->role === 'santri', 403);
+    public function progress()
+    {
+        abort_unless(Auth::user()->role === 'santri', 403);
 
-    $data = HafalanSetoran::where('santri_id', Auth::id())
-        ->with('nilaiHafalan')
-        ->whereHas('nilaiHafalan')
-        ->orderBy('tanggal_setoran')
-        ->get()
-        ->map(function ($setoran) {
-            return [
-                'tanggal' => $setoran->tanggal_setoran->format('d M'),
-                'surah'   => $setoran->surah,
-                'nilai'   => $setoran->nilaiHafalan->nilai_total,
-            ];
-        });
+        $data = HafalanSetoran::where('santri_id', Auth::id())
+            ->with('nilaiHafalan')
+            ->whereHas('nilaiHafalan')
+            ->orderBy('tanggal_setoran')
+            ->get()
+            ->map(function ($setoran) {
+                return [
+                    'tanggal' => $setoran->tanggal_setoran->format('d M'),
+                    'surah'   => $setoran->surah,
+                    'nilai'   => $setoran->nilaiHafalan->nilai_total,
+                ];
+            });
 
-    return view('setoran.progress', compact('data'));
-}
+        return view('setoran.progress', compact('data'));
     }
 }

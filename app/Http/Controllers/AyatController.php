@@ -2,64 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ayat;
+use App\Models\Ayat;
+use App\Models\Surah;
 use Illuminate\Http\Request;
 
 class AyatController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    // Tampilkan ayat-ayat dari surah tertentu
+    public function index($surahNomor)
     {
-        //
+        $surah = Surah::where('nomor', $surahNomor)->firstOrFail();
+        $ayats = $surah->ayats()->orderBy('nomor_ayat')->get();
+
+        return view('ayat.index', compact('surah', 'ayats'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    // Tampilkan detail 1 ayat
+    public function show($surahNomor, $nomorAyat)
     {
-        //
-    }
+        $surah = Surah::where('nomor', $surahNomor)->firstOrFail();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $ayat = Ayat::where('surah_id', $surah->id)
+            ->where('nomor_ayat', $nomorAyat)
+            ->firstOrFail();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(ayat $ayat)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(ayat $ayat)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, ayat $ayat)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(ayat $ayat)
-    {
-        //
+        return view('ayat.show', compact('surah', 'ayat'));
     }
 }
