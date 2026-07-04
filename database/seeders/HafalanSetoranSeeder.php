@@ -4,34 +4,40 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\HafalanSetoran;
+use App\Models\Surah;
 use App\Models\User;
 
 class HafalanSetoranSeeder extends Seeder
 {
     public function run(): void
     {
-        // Pastikan mengambil user dengan role santri, bukan sembarang user pertama
         $user = User::role('santri')->first();
+        $surahAlMulk = Surah::where('nomor_surah', 67)->first();
+        $surahAlWaqiah = Surah::where('nomor_surah', 56)->first();
 
-        if (!$user) {
-            $this->command->warn('Tidak ada user dengan role santri, seeder dilewati.');
+        if (!$user || !$surahAlMulk || !$surahAlWaqiah) {
+            $this->command->warn('User santri / data surah belum lengkap, seeder dilewati.');
             return;
         }
 
         HafalanSetoran::create([
-            'santri_id'  => $user->id,
-            'surah'      => 'Al-Mulk ayat 1-10',
-            'audio_path' => 'setoran_audio/dummy_rekaman_1.webm',
-            'catatan'    => 'Bacaan tajwid sudah baik.',
-            'status'     => 'dinilai', // agar bisa diambil NilaiHafalanSeeder
+            'santri_id'    => $user->id,
+            'surah_id'     => $surahAlMulk->id,
+            'ayat_mulai'   => 1,
+            'ayat_selesai' => 10,
+            'audio_path'   => 'setoran_audio/dummy_rekaman_1.webm',
+            'catatan'      => "Sudah muroja'ah sebelum setor.",
+            'status'       => 'dinilai',
         ]);
 
         HafalanSetoran::create([
-            'santri_id'  => $user->id,
-            'surah'      => 'Al-Waqiah ayat 1-5',
-            'audio_path' => 'setoran_audio/dummy_rekaman_2.webm',
-            'catatan'    => 'Perhatikan makharijul huruf.',
-            'status'     => 'menunggu', // belum dinilai
+            'santri_id'    => $user->id,
+            'surah_id'     => $surahAlWaqiah->id,
+            'ayat_mulai'   => 1,
+            'ayat_selesai' => 5,
+            'audio_path'   => 'setoran_audio/dummy_rekaman_2.webm',
+            'catatan'      => null,
+            'status'       => 'menunggu',
         ]);
     }
 }
