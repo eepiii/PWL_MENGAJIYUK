@@ -16,6 +16,12 @@ class AyatSeeder extends Seeder
         $surahs = DB::table('surahs')->pluck('id', 'nomor_surah');
 
         for ($nomor = 1; $nomor <= 114; $nomor++) {
+            // Jangan pernah menebak surah_id. Kalau surah belum ada di DB, lewati saja.
+            if (!isset($surahs[$nomor])) {
+                $this->command->warn("Skip surah {$nomor} - data surah belum ada di database");
+                continue;
+            }
+
             $response = Http::timeout(120)->retry(3, 2000)->get("https://equran.id/api/v2/surat/{$nomor}");
 
             if (!$response->successful()) {
@@ -24,8 +30,14 @@ class AyatSeeder extends Seeder
             }
 
             $data  = $response->json('data');
-            $ayats = $data['ayat'];
-            $surah_id_db = $surahs[$nomor] ?? $nomor;
+            $ayats = $data['ayat'] ?? [];
+
+            if (empty($ayats)) {
+                $this->command->warn("Skip surah {$nomor} - Data ayat kosong dari API");
+                continue;
+            }
+
+            $surah_id_db = $surahs[$nomor];
 
             foreach ($ayats as $ayat) {
                 DB::table('ayats')->updateOrInsert(
@@ -44,7 +56,7 @@ class AyatSeeder extends Seeder
                 );
             }
             $this->command->info("✓ Surah {$nomor} tersimpan");
-            usleep(500000); 
+            usleep(500000);
         }
     }
 }
