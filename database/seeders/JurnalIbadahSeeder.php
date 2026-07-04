@@ -11,9 +11,11 @@ class JurnalIbadahSeeder extends Seeder
 {
     public function run(): void
     {
-        $users = User::all();
+        // Jurnal ibadah hanya relevan untuk santri, bukan guru
+        $users = User::role('santri')->get();
+
         $startDate = Carbon::now()->startOfMonth();
-        $endDate = Carbon::now();
+        $endDate   = Carbon::now();
 
         foreach ($users as $user) {
             $currentDate = $startDate->copy();

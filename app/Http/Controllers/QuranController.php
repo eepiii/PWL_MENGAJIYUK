@@ -9,25 +9,26 @@ class QuranController extends Controller
 {
     public function index()
     {
-        $response = Http::withoutVerifying()->get('https://equran.id/api/v2/surat');
+        $response = Http::get('https://equran.id/api/v2/surat');
 
         $surah = [];
         if ($response->successful()) {
-            $surah = json_decode(json_encode($response->json('data')));
+            $surah = $response->json('data'); // tetap array, tidak perlu di-decode ulang
         }
 
         return view('quran.index', compact('surah'));
     }
 
+    // 2. Menampilkan Detail Surah
     public function show($nomor)
     {
-        $response = Http::withoutVerifying()->get("https://equran.id/api/v2/surat/{$nomor}");
+        $response = Http::get("https://equran.id/api/v2/surat/{$nomor}");
 
         if (!$response->successful()) {
             abort(404, 'Surah tidak ditemukan');
         }
 
-        $detailSurat = json_decode(json_encode($response->json('data')));
+        $detailSurat = $response->json('data'); // nama variabel disamakan dengan view
 
         return view('quran.show', compact('detailSurat'));
     }

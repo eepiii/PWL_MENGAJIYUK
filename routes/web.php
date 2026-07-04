@@ -14,13 +14,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Semua route di bawah wajib login
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-    // --- DASHBOARD ---
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+// Semua route di dalam sini wajib login (Auth)
+Route::middleware('auth')->group(function () {
 
     // --- PROFILE ---
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -49,11 +48,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/setoran/progress', [NilaiHafalanController::class, 'progress'])->name('setoran.progress');
     Route::get('/setoran/{setoran}', [HafalanSetoranController::class, 'show'])->name('setoran.show');
 
-    // --- PENILAIAN (guru) ---
-    // pengecekan role sudah ada di dalam NilaiHafalanController (abort_unless guru)
-    Route::get('/setoran/{setoran}/nilai/create', [NilaiHafalanController::class, 'create'])->name('nilai.create');
-    Route::post('/setoran/{setoran}/nilai', [NilaiHafalanController::class, 'store'])->name('nilai.store');
+    // --- FITUR KHUSUS SANTRI ---
+    Route::middleware(['role:santri'])->group(function () {
+        Route::get('/setoran/create', [HafalanSetoranController::class, 'create'])->name('setoran.create');
+        Route::post('/setoran', [HafalanSetoranController::class, 'store'])->name('setoran.store');
+        Route::get('/setoran/progress', [HafalanSetoranController::class, 'progress'])->name('setoran.progress');
+    });
 
+    // --- FITUR KHUSUS GURU ---
+    Route::middleware(['role:guru'])->group(function () {
+        Route::get('/penilaian', [NilaiHafalanController::class, 'index'])->name('penilaian.index');
+        Route::post('/penilaian/{id}', [NilaiHafalanController::class, 'store'])->name('penilaian.store');
+
+        Route::get('/setoran/{setoran}/nilai/create', [NilaiHafalanController::class, 'create'])->name('nilai.create');
+        Route::post('/setoran/{setoran}/nilai', [NilaiHafalanController::class, 'store'])->name('nilai.store');
+    });
 });
 
 require __DIR__.'/auth.php';
