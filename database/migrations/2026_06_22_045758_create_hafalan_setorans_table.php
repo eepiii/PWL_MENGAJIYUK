@@ -11,12 +11,15 @@ return new class extends Migration
         Schema::create('hafalan_setorans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('santri_id')->constrained('users')->onDelete('cascade');
-            $table->string('surah');
-            $table->string('audio_path')->nullable();
-            $table->text('catatan')->nullable();
-            // status dibutuhkan agar NilaiHafalanSeeder bisa memfilter setoran yang siap dinilai
+            $table->foreignId('surah_id')->constrained('surahs')->onDelete('cascade');
+            $table->unsignedInteger('ayat_mulai');
+            $table->unsignedInteger('ayat_selesai');
+            $table->string('audio_path'); // hasil rekaman mic santri
+            $table->text('catatan')->nullable(); // catatan dari santri saat submit
             $table->string('status')->default('menunggu'); // menunggu | dinilai
             $table->timestamps();
+
+            $table->index(['santri_id', 'status']);
         });
     }
 
