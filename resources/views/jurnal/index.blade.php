@@ -1,105 +1,157 @@
-<!-- resources/views/jurnal/index.blade.php -->
+@extends('layouts.app')
 
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Jurnal Ibadah Harian
-        </h2>
-    </x-slot>
+@section('content')
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                
-                <div class="flex flex-col md:flex-row justify-between items-center mb-6">
-                    <form action="{{ route('jurnal.index') }}" method="GET" class="flex items-center gap-2 mb-4 md:mb-0">
-                        <label class="font-bold">Tanggal:</label>
-                        <input type="date" name="tanggal" value="{{ $tanggal }}" class="border-gray-300 rounded-md shadow-sm" onchange="this.form.submit()">
-                    </form>
-                    <div class="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg font-bold">
-                        Progres Shalat: {{ $jurnal->persentaseShalat() }}%
-                    </div>
-                </div>
+    .jurnal-wrap { max-width: 780px; margin: 50px auto; padding: 0 20px 80px; font-family: 'Inter', sans-serif; }
+    .jurnal-breadcrumb { font-size: 11px; letter-spacing: 2px; color: #999; text-transform: uppercase; margin-bottom: 8px; }
+    .jurnal-title { font-family: 'Playfair Display', serif; font-size: 32px; color: #1a3a2a; margin: 0 0 6px; }
+    .jurnal-subtitle { font-size: 14px; color: #888; margin-bottom: 30px; }
+    .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+    .filter-btn { border: 1.5px solid #1a3a2a; border-radius: 30px; padding: 6px 18px; font-size: 13px; font-weight: 600; cursor: pointer; background: transparent; color: #1a3a2a; transition: all 0.2s; }
+    .filter-btn.active { background: #1a3a2a; color: white; }
+    .progres-bar-wrap { background: #f0f0eb; border-radius: 30px; height: 8px; margin-top: 6px; overflow: hidden; }
+    .progres-bar-fill { background: #1a3a2a; height: 8px; border-radius: 30px; transition: width 0.5s; }
+    .shalat-card { background: white; border-radius: 4px; padding: 20px 24px; margin-bottom: 2px; border-left: 3px solid transparent; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .shalat-card.done { border-left-color: #1a3a2a; background: #f9fdf9; }
+    .shalat-card.absen { border-left-color: #e5e5e5; }
+    .shalat-name { font-family: 'Playfair Display', serif; font-size: 17px; color: #1a3a2a; font-weight: 600; margin: 0; }
+    .shalat-time { font-size: 12px; color: #888; margin: 2px 0 0; }
+    .badge-status { font-size: 10px; letter-spacing: 1px; font-weight: 700; padding: 4px 12px; border-radius: 30px; text-transform: uppercase; }
+    .badge-tepat { background: #1a3a2a; color: white; }
+    .badge-qadha { background: #d4a017; color: white; }
+    .badge-absen { background: #f0f0eb; color: #999; border: 1px dashed #ccc; }
+    .jurnal-select { border: 1px solid #e0e0e0; border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #333; background: white; outline: none; min-width: 160px; }
+    .section-label { font-size: 10px; letter-spacing: 2px; color: #aaa; text-transform: uppercase; font-weight: 700; margin: 30px 0 12px; border-bottom: 1px solid #f0f0eb; padding-bottom: 8px; }
+    .extra-card { background: white; border-radius: 4px; padding: 20px 24px; margin-bottom: 2px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-left: 3px solid #e5e5e5; }
+    .save-btn { width: 100%; background: #1a3a2a; color: white; border: none; border-radius: 8px; padding: 16px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 30px; letter-spacing: 0.5px; transition: opacity 0.2s; }
+    .save-btn:hover { opacity: 0.88; }
+    .alert-success-custom { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; border-radius: 8px; padding: 14px 18px; font-size: 14px; font-weight: 600; margin-bottom: 24px; }
+</style>
 
-                @if(session('success'))
-                    <div class="bg-green-100 text-green-700 p-4 rounded mb-6 font-bold">
-                        {{ session('success') }}
-                    </div>
-                @endif
+<div class="jurnal-wrap">
 
-                <form action="{{ route('jurnal.store') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="tanggal" value="{{ $tanggal }}">
+    {{-- Breadcrumb & Judul --}}
+    <p class="jurnal-breadcrumb">Jurnal Ibadah · Harian</p>
+    <h1 class="jurnal-title">Catatan Ibadah</h1>
+    <p class="jurnal-subtitle">Pantau konsistensi ibadah harianmu dan catat amalan di sini.</p>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        @foreach(['subuh', 'dzuhur', 'ashar', 'maghrib', 'isya'] as $waktu)
-                            @php 
-                                $field = 'shalat_' . $waktu; 
-                                $status = $jurnal->$field;
-                            @endphp
-                            
-                            <div class="border p-4 rounded-lg {{ $status > 0 ? 'bg-green-50 border-green-400' : 'bg-gray-50 border-gray-200' }}">
-                                <div class="flex justify-between items-center mb-2">
-                                    <div>
-                                        <label class="font-bold capitalize text-gray-700 block">Shalat {{ $waktu }}</label>
-                                        @if($jadwalShalat && isset($jadwalShalat[$waktu]))
-                                            <span class="text-xs text-indigo-600 font-semibold">Masuk: {{ $jadwalShalat[$waktu] }} WIB</span>
-                                        @else
-                                            <span class="text-xs text-red-500 font-semibold">Jadwal API tidak tersedia</span>
-                                        @endif
-                                    </div>
-                                    @if($status > 0)
-                                        <span class="text-green-600 font-bold text-sm bg-green-200 px-2 py-1 rounded">
-                                            ✅ {{ $jurnal->labelShalat($status) }}
-                                        </span>
-                                    @endif
-                                </div>
-                                
-                                <select name="{{ $field }}" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                    <option value="0" {{ $status == 0 ? 'selected' : '' }}>Tidak Shalat</option>
-                                    <option value="1" {{ $status == 1 ? 'selected' : '' }}>Tepat Waktu</option>
-                                    <option value="2" {{ $status == 2 ? 'selected' : '' }}>Qadha</option>
-                                </select>
-                            </div>
-                        @endforeach
+    {{-- Filter Tanggal & Progres --}}
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 30px;">
+        <form action="{{ route('jurnal.index') }}" method="GET" style="display: flex; align-items: center; gap: 10px;">
+            <label style="font-size: 12px; font-weight: 600; color: #888; letter-spacing: 1px; text-transform: uppercase;">Tanggal</label>
+            <input type="date" name="tanggal" value="{{ $tanggal }}"
+                style="border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #1a3a2a; font-weight: 600; outline: none; cursor: pointer;"
+                onchange="this.form.submit()">
+        </form>
 
-                        <div class="border p-4 rounded-lg {{ $jurnal->puasa_sunnah ? 'bg-green-50 border-green-400' : 'bg-gray-50 border-gray-200' }}">
-                            <div class="flex justify-between items-center mb-2">
-                                <label class="font-bold text-gray-700">Puasa Sunnah</label>
-                                @if($jurnal->puasa_sunnah)
-                                    <span class="text-green-600 font-bold text-sm bg-green-200 px-2 py-1 rounded">✅ Selesai</span>
-                                @endif
-                            </div>
-                            <select name="puasa_sunnah" class="w-full border-gray-300 rounded-md shadow-sm">
-                                <option value="0" {{ !$jurnal->puasa_sunnah ? 'selected' : '' }}>Tidak</option>
-                                <option value="1" {{ $jurnal->puasa_sunnah ? 'selected' : '' }}>Ya</option>
-                            </select>
-                        </div>
-
-                        <div class="border p-4 rounded-lg {{ $jurnal->tilawah_halaman > 0 ? 'bg-green-50 border-green-400' : 'bg-gray-50 border-gray-200' }}">
-                            <div class="flex justify-between items-center mb-2">
-                                <label class="font-bold text-gray-700">Tilawah (Jumlah Halaman)</label>
-                                @if($jurnal->tilawah_halaman > 0)
-                                    <span class="text-green-600 font-bold text-sm bg-green-200 px-2 py-1 rounded">✅ {{ $jurnal->tilawah_halaman }} Halaman</span>
-                                @endif
-                            </div>
-                            <input type="number" name="tilawah_halaman" value="{{ $jurnal->tilawah_halaman }}" min="0" class="w-full border-gray-300 rounded-md shadow-sm">
-                        </div>
-                    </div>
-
-                    <div class="mt-6 border p-4 rounded-lg bg-gray-50 border-gray-200">
-                        <label class="font-bold text-gray-700 block mb-2">Catatan Harian</label>
-                        <textarea name="catatan" rows="3" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="Opsional...">{{ $jurnal->catatan }}</textarea>
-                    </div>
-
-                    <div class="mt-6">
-                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg shadow">
-                            Simpan Pembaruan Jurnal
-                        </button>
-                    </div>
-                </form>
-
+        @php $progres = $jurnal->persentaseShalat(); @endphp
+        <div style="min-width: 220px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 12px; font-weight: 600; color: #888; letter-spacing: 1px; text-transform: uppercase;">Progres Shalat</span>
+                <span style="font-family: 'Playfair Display', serif; font-size: 22px; color: #1a3a2a; font-weight: 700;">{{ $progres }}%</span>
+            </div>
+            <div class="progres-bar-wrap">
+                <div class="progres-bar-fill" style="width: {{ $progres }}%;"></div>
             </div>
         </div>
     </div>
-</x-app-layout>
+
+    {{-- Alert --}}
+    @if(session('success'))
+        <div class="alert-success-custom">✨ {{ session('success') }}</div>
+    @endif
+
+    <form action="{{ route('jurnal.store') }}" method="POST">
+        @csrf
+        <input type="hidden" name="tanggal" value="{{ $tanggal }}">
+
+        {{-- Shalat --}}
+        <p class="section-label">🕌 Shalat Fardhu</p>
+
+        @foreach(['subuh', 'dzuhur', 'ashar', 'maghrib', 'isya'] as $waktu)
+            @php
+                $field  = 'shalat_' . $waktu;
+                $status = $jurnal->$field;
+            @endphp
+            <div class="shalat-card {{ $status > 0 ? 'done' : 'absen' }}">
+                <div style="flex: 1;">
+                    <p class="shalat-name">Shalat {{ ucfirst($waktu) }}</p>
+                    @if($jadwalShalat && isset($jadwalShalat[$waktu]))
+                        <p class="shalat-time">⏰ Waktu masuk: {{ $jadwalShalat[$waktu] }} WIB</p>
+                    @else
+                        <p class="shalat-time">Jadwal tidak tersedia</p>
+                    @endif
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    @if($status == 1)
+                        <span class="badge-status badge-tepat">Tepat Waktu</span>
+                    @elseif($status == 2)
+                        <span class="badge-status badge-qadha">Qadha</span>
+                    @else
+                        <span class="badge-status badge-absen">Belum</span>
+                    @endif
+
+                    <select name="{{ $field }}" class="jurnal-select">
+                        <option value="0" {{ $status == 0 ? 'selected' : '' }}>Tidak Shalat</option>
+                        <option value="1" {{ $status == 1 ? 'selected' : '' }}>Tepat Waktu</option>
+                        <option value="2" {{ $status == 2 ? 'selected' : '' }}>Qadha</option>
+                    </select>
+                </div>
+            </div>
+        @endforeach
+
+        {{-- Amalan Tambahan --}}
+        <p class="section-label">🌙 Amalan Tambahan</p>
+
+        {{-- Puasa Sunnah --}}
+        <div class="extra-card" style="{{ $jurnal->puasa_sunnah ? 'border-left-color: #1a3a2a; background: #f9fdf9;' : '' }}">
+            <div style="flex: 1;">
+                <p class="shalat-name">Puasa Sunnah</p>
+                <p class="shalat-time">Catat jika kamu berpuasa sunnah hari ini</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                @if($jurnal->puasa_sunnah)
+                    <span class="badge-status badge-tepat">Alhamdulillah</span>
+                @endif
+                <select name="puasa_sunnah" class="jurnal-select">
+                    <option value="0" {{ !$jurnal->puasa_sunnah ? 'selected' : '' }}>Tidak Puasa</option>
+                    <option value="1" {{ $jurnal->puasa_sunnah ? 'selected' : '' }}>Ya, Puasa</option>
+                </select>
+            </div>
+        </div>
+
+        {{-- Tilawah --}}
+        <div class="extra-card" style="{{ $jurnal->tilawah_halaman > 0 ? 'border-left-color: #1a3a2a; background: #f9fdf9;' : '' }}">
+            <div style="flex: 1;">
+                <p class="shalat-name">Tilawah Al-Qur'an</p>
+                <p class="shalat-time">Catat jumlah halaman yang kamu baca hari ini</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                @if($jurnal->tilawah_halaman > 0)
+                    <span class="badge-status badge-tepat">{{ $jurnal->tilawah_halaman }} Hal</span>
+                @endif
+                <input type="number" name="tilawah_halaman"
+                    value="{{ $jurnal->tilawah_halaman }}"
+                    min="0" placeholder="0"
+                    style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 8px 12px; font-size: 13px; width: 100px; outline: none; text-align: center; font-weight: 600; color: #1a3a2a;">
+            </div>
+        </div>
+
+        {{-- Catatan --}}
+        <p class="section-label">📝 Evaluasi & Catatan</p>
+        <div style="background: white; border-radius: 4px; border-left: 3px solid #e5e5e5; padding: 20px 24px;">
+            <textarea name="catatan" rows="4"
+                style="width: 100%; border: none; outline: none; resize: none; font-size: 14px; color: #555; font-family: 'Inter', sans-serif; background: transparent; line-height: 1.7;"
+                placeholder="Tulis refleksi ibadah, kendala, atau doa untuk hari ini...">{{ $jurnal->catatan }}</textarea>
+        </div>
+
+        <button type="submit" class="save-btn">
+            Simpan Jurnal Ibadah
+        </button>
+
+    </form>
+</div>
+@endsection

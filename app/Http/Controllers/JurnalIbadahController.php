@@ -33,22 +33,24 @@ class JurnalIbadahController extends Controller
             ]);
         }
 
-        $idKota = '1222';
         $parsedDate = Carbon::parse($tanggal);
-        $tahun = $parsedDate->year;
-        $bulan = str_pad($parsedDate->month, 2, '0', STR_PAD_LEFT);
-        $hari  = $parsedDate->format('Y-m-d');
+        $tahun      = $parsedDate->format('Y');
+        $bulan      = $parsedDate->format('m');
+        $hari       = $parsedDate->format('Y-m-d');
 
         $jadwalShalat = null;
 
         try {
-            $response = Http::withoutVerifying()->get(
-                "https://equran.id/api/v2/shalat/jadwal/{$idKota}/{$tahun}/{$bulan}"
-            );
+            $response = Http::withoutVerifying()->post('https://equran.id/api/v2/shalat', [
+                'provinsi' => 'DKI Jakarta',
+                'kabkota'  => 'Kota Jakarta',
+                'bulan'    => (int) $bulan,
+                'tahun'    => (int) $tahun,
+            ]);
 
             if ($response->successful()) {
                 $data = $response->json('data.jadwal');
-                $jadwalShalat = collect($data)->firstWhere('date', $hari);
+                $jadwalShalat = collect($data)->firstWhere('tanggal_lengkap', $hari);
             }
         } catch (\Exception $e) {
             $jadwalShalat = null;
