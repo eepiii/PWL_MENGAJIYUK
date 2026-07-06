@@ -11,30 +11,23 @@ return new class extends Migration
         Schema::create('nilai_hafalans', function (Blueprint $table) {
             $table->id();
 
-            // Relasi ke setoran yang dinilai
             $table->foreignId('hafalan_setoran_id')
                 ->constrained('hafalan_setorans')
                 ->onDelete('cascade');
 
-            // Guru yang menilai
             $table->foreignId('guru_id')
                 ->constrained('users')
                 ->onDelete('cascade');
 
-            // Komponen penilaian
             $table->unsignedTinyInteger('kelancaran'); // 0-100
             $table->unsignedTinyInteger('tajwid');      // 0-100
             $table->unsignedTinyInteger('makhraj');     // 0-100
-
-            // Nilai akhir (rata-rata dari 3 komponen di atas)
             $table->unsignedTinyInteger('nilai_total');
 
-            // Catatan/feedback dari guru
             $table->text('catatan')->nullable();
 
             $table->timestamps();
 
-            // Satu setoran hanya boleh dinilai sekali
             $table->unique('hafalan_setoran_id');
         });
     }

@@ -1,123 +1,138 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-12">
-    <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+<div class="container" style="max-width:700px;margin-top:30px;margin-bottom:60px;">
+    <a href="{{ route('setoran.index') }}" class="btn btn-default btn-sm" style="border-radius:20px;margin-bottom:20px;">← Kembali ke Riwayat</a>
 
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-gray-800">
-                    @if(Auth::user()->role === 'guru')
-                        Riwayat Setoran Santri
-                    @else
-                        Riwayat Setoran Saya
-                    @endif
-                </h2>
+    <div class="panel panel-default" style="border-radius:12px;padding:30px;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+        <h3 style="margin-top:0;color:#0f5132;font-weight:bold;">Setor Hafalan Baru</h3>
 
-                @if(Auth::user()->role === 'santri')
-                    <a href="{{ route('setoran.create') }}"
-                       class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow">
-                        + Setor Hafalan Baru
-                    </a>
-                    <a href="{{ route('setoran.progress') }}"
-                       class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg shadow">
-                        Lihat Progress
-                    </a>
-                @endif
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul style="margin-bottom:0;">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form id="formSetoran" action="{{ route('setoran.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+
+            <div class="form-group">
+                <label>Surah</label>
+                <select name="surah_id" class="form-control" required>
+                    <option value="">-- Pilih Surah --</option>
+                    @foreach ($surahs as $surah)
+                        <option value="{{ $surah->id }}" {{ old('surah_id') == $surah->id ? 'selected' : '' }}>
+                            {{ $surah->nomor_surah }}. {{ $surah->nama_latin }} ({{ $surah->jumlah_ayat }} ayat)
+                        </option>
+                    @endforeach
+                </select>
             </div>
 
-            @if(session('success'))
-                <div class="mb-4 p-4 rounded bg-green-100 text-green-700 font-bold">
-                    {{ session('success') }}
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>Ayat Mulai</label>
+                        <input type="number" name="ayat_mulai" class="form-control" min="1" value="{{ old('ayat_mulai') }}" required>
+                    </div>
                 </div>
-            @endif
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>Ayat Selesai</label>
+                        <input type="number" name="ayat_selesai" class="form-control" min="1" value="{{ old('ayat_selesai') }}" required>
+                    </div>
+                </div>
+            </div>
 
-            @if($setorans->isEmpty())
-                <p class="text-gray-500 text-center py-8">Belum ada setoran hafalan.</p>
-            @else
-                <div class="space-y-4">
-                    @foreach($setorans as $setoran)
-                        <div class="border rounded-lg p-4 {{ $setoran->status === 'sudah_dinilai' ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200' }}">
+            <div class="form-group">
+                <label>Catatan (opsional)</label>
+                <textarea name="catatan" class="form-control" rows="2" placeholder="Contoh: sudah muroja'ah 3x sebelum setor">{{ old('catatan') }}</textarea>
+            </div>
 
-                            <div class="flex justify-between items-start mb-2">
-                                <div>
-                                    <p class="font-bold text-gray-800">{{ $setoran->surah }}</p>
+            <hr>
 
-                                    @if(Auth::user()->role === 'guru')
-                                        <p class="text-sm text-gray-500">
-                                            Santri: {{ $setoran->santri->name ?? '-' }}
-                                        </p>
-                                    @endif
+            <div class="form-group text-center">
+                <label style="display:block;font-weight:bold;color:#555;">Rekam Bacaan Hafalan</label>
 
-                                    <p class="text-xs text-gray-400">
-                                        {{ $setoran->tanggal_setoran->format('d M Y, H:i') }}
-                                    </p>
-                                </div>
-
-                                <span class="text-xs font-bold px-3 py-1 rounded-full
-                                    {{ $setoran->status === 'sudah_dinilai' ? 'bg-green-600 text-white' : 'bg-yellow-500 text-white' }}">
-                                    {{ $setoran->status === 'sudah_dinilai' ? 'Sudah Dinilai' : 'Belum Dinilai' }}
-                                </span>
-                            </div>
-
-                            @if($setoran->audio_path)
-                                <audio controls class="w-full mt-2">
-                                    <source src="{{ asset('storage/' . $setoran->audio_path) }}">
-                                    Browser Anda tidak mendukung audio player.
-                                </audio>
-                            @endif
-
-                            @if($setoran->catatan)
-                                <p class="text-sm text-gray-600 mt-2 italic">"{{ $setoran->catatan }}"</p>
-                            @endif
-
-                            {{-- Tampilkan nilai kalau sudah dinilai --}}
-                            @if($setoran->status === 'sudah_dinilai' && $setoran->nilaiHafalan)
-                                <div class="mt-3 pt-3 border-t border-gray-200 grid grid-cols-4 gap-2 text-center">
-                                    <div>
-                                        <p class="text-xs text-gray-400">Kelancaran</p>
-                                        <p class="font-bold text-gray-700">{{ $setoran->nilaiHafalan->kelancaran }}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs text-gray-400">Tajwid</p>
-                                        <p class="font-bold text-gray-700">{{ $setoran->nilaiHafalan->tajwid }}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs text-gray-400">Makhraj</p>
-                                        <p class="font-bold text-gray-700">{{ $setoran->nilaiHafalan->makhraj }}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs text-gray-400">Nilai Akhir</p>
-                                        <p class="font-bold text-indigo-600 text-lg">{{ $setoran->nilaiHafalan->nilai_total }}</p>
-                                    </div>
-                                </div>
-                                @if($setoran->nilaiHafalan->catatan)
-                                    <p class="text-sm text-gray-600 mt-2">
-                                        <span class="font-bold">Catatan Guru:</span> {{ $setoran->nilaiHafalan->catatan }}
-                                    </p>
-                                @endif
-                            @endif
-
-                            {{-- Tombol nilai untuk guru --}}
-                            @if(Auth::user()->role === 'guru' && $setoran->status === 'belum_dinilai')
-                                <div class="mt-3">
-                                    <a href="{{ route('nilai.create', $setoran->id) }}"
-                                       class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold py-2 px-4 rounded-lg shadow">
-                                        Beri Penilaian
-                                    </a>
-                                </div>
-                            @endif
-
-                        </div>
-                    @endforeach
+                <div style="margin:15px 0;">
+                    <button type="button" id="btnRecord" class="btn btn-danger" style="border-radius:30px;padding:10px 25px;font-weight:bold;">
+                        <i class="fa fa-microphone"></i> Mulai Rekam
+                    </button>
+                    <button type="button" id="btnStop" class="btn btn-default" style="border-radius:30px;padding:10px 25px;font-weight:bold;display:none;">
+                        <i class="fa fa-stop"></i> Berhenti
+                    </button>
                 </div>
 
-                <div class="mt-6">
-                    {{ $setorans->links() }}
-                </div>
-            @endif
+                <p id="statusRekam" style="color:#888;font-size:13px;"></p>
 
-        </div>
+                <audio id="previewAudio" controls style="display:none;width:100%;margin-top:10px;"></audio>
+                <input type="file" name="audio" id="audioInput" style="display:none;" accept="audio/*">
+            </div>
+
+            <button type="submit" id="btnSubmit" class="btn btn-success btn-block" style="border-radius:30px;padding:12px;font-weight:bold;background-color:#0f5132;border-color:#0f5132;color:white;" disabled>
+                Kirim Setoran
+            </button>
+        </form>
     </div>
 </div>
+
+<script>
+    let mediaRecorder;
+    let chunks = [];
+    let recordedBlob = null;
+
+    const btnRecord = document.getElementById('btnRecord');
+    const btnStop = document.getElementById('btnStop');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const statusRekam = document.getElementById('statusRekam');
+    const preview = document.getElementById('previewAudio');
+    const form = document.getElementById('formSetoran');
+
+    btnRecord.addEventListener('click', async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            chunks = [];
+            mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                recordedBlob = new Blob(chunks, { type: 'audio/webm' });
+                preview.src = URL.createObjectURL(recordedBlob);
+                preview.style.display = 'block';
+                btnSubmit.disabled = false;
+                statusRekam.innerText = 'Rekaman selesai. Silakan dengarkan sebelum mengirim.';
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorder.start();
+            btnRecord.style.display = 'none';
+            btnStop.style.display = 'inline-block';
+            statusRekam.innerText = 'Sedang merekam...';
+        } catch (err) {
+            alert('Tidak bisa mengakses mikrofon. Pastikan izin mic diaktifkan di browser.');
+        }
+    });
+
+    btnStop.addEventListener('click', () => {
+        mediaRecorder.stop();
+        btnStop.style.display = 'none';
+        btnRecord.style.display = 'inline-block';
+        btnRecord.innerHTML = '<i class="fa fa-microphone"></i> Rekam Ulang';
+    });
+
+    form.addEventListener('submit', (e) => {
+        if (!recordedBlob) {
+            e.preventDefault();
+            alert('Silakan rekam hafalan terlebih dahulu.');
+            return;
+        }
+        const file = new File([recordedBlob], 'setoran-' + Date.now() + '.webm', { type: 'audio/webm' });
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        document.getElementById('audioInput').files = dt.files;
+    });
+</script>
 @endsection

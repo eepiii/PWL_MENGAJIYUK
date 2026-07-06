@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <div class="container" style="margin-top: 30px; margin-bottom: 50px; max-width: 1140px; font-family: 'Segoe UI', Arial, sans-serif;">
-    
+
     <div class="text-center" style="background-color: #0f5132; color: white; border-radius: 12px; padding: 50px 20px; margin-bottom: 40px; box-shadow: 0 4px 15px rgba(15,81,50,0.1);">
         <h1 style="font-size: 38px; font-weight: bold; margin-bottom: 15px; font-family: 'Georgia', serif;">
             Selamat Datang di MengajiYuk!
@@ -12,13 +12,13 @@
         <p style="font-size: 16px; opacity: 0.9; max-width: 700px; margin: 0 auto 25px auto; line-height: 1.6;">
             Platform digital pendukung hafalan santri, jurnal ibadah, dan pembelajaran Al-Qur'an interaktif.
         </p>
-        <a href="/quran" class="btn" style="background-color: #e67e22; color: white; font-weight: bold; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-size: 15px; display: inline-block; transition: all 0.2s; box-shadow: 0 4px 10px rgba(230,126,34,0.2);">
+        <a href="{{ route('quran.index') }}" class="btn" style="background-color: #e67e22; color: white; font-weight: bold; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-size: 15px; display: inline-block; transition: all 0.2s; box-shadow: 0 4px 10px rgba(230,126,34,0.2);">
             <i class="fa-solid fa-book-open" style="margin-right: 8px;"></i> Mulai Baca Al-Qur'an
         </a>
     </div>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 40px;">
-        
+
         <div class="card-menu" style="background: white; border: 1px solid #eef2f5; border-radius: 12px; padding: 35px 25px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; min-height: 280px;">
             <div>
                 <div style="color: #0f5132; font-size: 40px; margin-bottom: 15px;">
@@ -30,7 +30,7 @@
                 </p>
             </div>
             <div>
-                <a href="/quran" class="btn" style="border: 1px solid #ccc; background: white; color: #333; font-weight: bold; padding: 8px 24px; border-radius: 6px; text-decoration: none; font-size: 13px; display: inline-block;">
+                <a href="{{ route('quran.index') }}" class="btn" style="border: 1px solid #ccc; background: white; color: #333; font-weight: bold; padding: 8px 24px; border-radius: 6px; text-decoration: none; font-size: 13px; display: inline-block;">
                     Buka Qur'an
                 </a>
             </div>
@@ -43,13 +43,33 @@
                 </div>
                 <h3 style="font-weight: bold; color: #222; margin: 0 0 10px 0; font-size: 20px;">Setoran Hafalan</h3>
                 <p style="color: #666; font-size: 14px; line-height: 1.6; margin: 0 0 20px 0;">
-                    Rekam dan setor hafalan ayat Al-Qur'an kamu secara mandiri untuk dikoreksi oleh Ustadz pembimbing.
+                    @auth
+                        @if(auth()->user()->hasRole('guru'))
+                            Pantau riwayat setoran hafalan seluruh santri bimbinganmu.
+                        @else
+                            Rekam dan setor hafalan ayat Al-Qur'an kamu secara mandiri untuk dikoreksi oleh Ustadz pembimbing.
+                        @endif
+                    @else
+                        Rekam dan setor hafalan ayat Al-Qur'an kamu secara mandiri untuk dikoreksi oleh Ustadz pembimbing.
+                    @endauth
                 </p>
             </div>
             <div>
-                <a href="/setoran-hafalan" class="btn" style="border: 1px solid #ccc; background: white; color: #333; font-weight: bold; padding: 8px 24px; border-radius: 6px; text-decoration: none; font-size: 13px; display: inline-block;">
-                    Mulai Setoran
-                </a>
+                @auth
+                    @if(auth()->user()->hasRole('guru'))
+                        <a href="{{ route('setoran.index') }}" class="btn" style="border: 1px solid #ccc; background: white; color: #333; font-weight: bold; padding: 8px 24px; border-radius: 6px; text-decoration: none; font-size: 13px; display: inline-block;">
+                            Lihat Riwayat
+                        </a>
+                    @else
+                        <a href="{{ route('setoran.create') }}" class="btn" style="border: 1px solid #ccc; background: white; color: #333; font-weight: bold; padding: 8px 24px; border-radius: 6px; text-decoration: none; font-size: 13px; display: inline-block;">
+                            Mulai Setoran
+                        </a>
+                    @endif
+                @else
+                    <a href="{{ route('login') }}" class="btn" style="border: 1px solid #ccc; background: white; color: #333; font-weight: bold; padding: 8px 24px; border-radius: 6px; text-decoration: none; font-size: 13px; display: inline-block;">
+                        Masuk untuk Setoran
+                    </a>
+                @endauth
             </div>
         </div>
 
@@ -64,6 +84,7 @@
                 </p>
             </div>
             <div>
+                {{-- Catatan: route jurnal ibadah belum dibuat di web.php --}}
                 <a href="/jurnal" class="btn" style="border: 1px solid #ccc; background: white; color: #333; font-weight: bold; padding: 8px 24px; border-radius: 6px; text-decoration: none; font-size: 13px; display: inline-block;">
                     Isi Jurnal
                 </a>
@@ -73,9 +94,9 @@
     </div>
 
     @auth
-        @if(optional(auth()->user())->role == 'guru' || optional(auth()->user())->role == 'ustadz')
+        @if(auth()->user()->hasRole('guru'))
         <div style="margin-top: 30px; border-top: 1px dashed #cbd5e1; padding-top: 30px;">
-            <a href="#" style="display: block; padding: 20px; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; text-decoration: none; transition: all 0.2s;">
+            <a href="{{ route('penilaian.index') }}" style="display: block; padding: 20px; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; text-decoration: none; transition: all 0.2s;">
                 <h5 style="margin: 0 0 5px 0; font-size: 18px; font-weight: bold; color: #166534;">📝 Penilaian Setoran</h5>
                 <p style="margin: 0; font-size: 14px; color: #14532d;">Periksa, dengarkan, dan beri nilai pada setoran hafalan santri.</p>
             </a>
