@@ -31,8 +31,6 @@ class NilaiHafalanSeeder extends Seeder
             $makhraj    = rand(65, 100);
             $nilaiTotal = (int) round(($kelancaran + $tajwid + $makhraj) / 3);
 
-            // Nama kolom di sini WAJIB sama persis dengan migration nilai_hafalans:
-            // hafalan_setoran_id, guru_id, kelancaran, tajwid, makhraj, nilai_total, catatan
             NilaiHafalan::updateOrCreate(
                 ['hafalan_setoran_id' => $setoran->id],
                 [

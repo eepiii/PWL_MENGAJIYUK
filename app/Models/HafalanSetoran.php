@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class HafalanSetoran extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'santri_id',
         'surah_id',
@@ -16,6 +19,8 @@ class HafalanSetoran extends Model
         'status',
     ];
 
+    // "santri" adalah role dari User, BUKAN model terpisah.
+    // Jangan pernah belongsTo(Santri::class) - model itu tidak ada.
     public function santri()
     {
         return $this->belongsTo(User::class, 'santri_id');

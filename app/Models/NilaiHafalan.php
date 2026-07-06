@@ -8,75 +8,32 @@ class NilaiHafalan extends Model
 {
     protected $table = 'nilai_hafalans';
 
+    // Kolom ini WAJIB sama persis dengan migration create_nilai_hafalans_table:
+    // hafalan_setoran_id, guru_id, kelancaran, tajwid, makhraj, nilai_total, catatan
     protected $fillable = [
-        'setoran_id',
+        'hafalan_setoran_id',
         'guru_id',
-        'santri_id',
-        'nilai',
-        'kategori',
-        'catatan_guru',
-        'dinilai_at',
+        'kelancaran',
+        'tajwid',
+        'makhraj',
+        'nilai_total',
+        'catatan',
     ];
 
     protected $casts = [
-        'nilai'      => 'integer',
-        'dinilai_at' => 'datetime',
+        'kelancaran'  => 'integer',
+        'tajwid'      => 'integer',
+        'makhraj'     => 'integer',
+        'nilai_total' => 'integer',
     ];
 
-    // =====================
-    // Relasi
-    // =====================
-
-    // Nilai dimiliki oleh satu setoran
     public function setoran()
     {
-        return $this->belongsTo(HafalanSetoran::class, 'setoran_id');
+        return $this->belongsTo(HafalanSetoran::class, 'hafalan_setoran_id');
     }
 
-    // Nilai diberikan oleh satu guru
     public function guru()
     {
         return $this->belongsTo(User::class, 'guru_id');
-    }
-
-    // Nilai diterima oleh satu santri
-    public function santri()
-    {
-        return $this->belongsTo(User::class, 'santri_id');
-    }
-
-    // =====================
-    // Scope
-    // =====================
-
-    public function scopeByKategori($query, $kategori)
-    {
-        return $query->where('kategori', $kategori);
-    }
-
-    public function scopeBySantri($query, $santriId)
-    {
-        return $query->where('santri_id', $santriId);
-    }
-
-    // =====================
-    // Helper
-    // =====================
-
-    public function labelKategori(): string
-    {
-        return match($this->kategori) {
-            'lancar'      => '✓ Lancar',
-            'cukup'       => '~ Cukup',
-            'perlu_ulang' => '✗ Perlu Ulang',
-            default       => '-',
-        };
-    }
-
-    public function warnaNilai(): string
-    {
-        if ($this->nilai >= 85) return 'green';
-        if ($this->nilai >= 70) return 'yellow';
-        return 'red';
     }
 }
