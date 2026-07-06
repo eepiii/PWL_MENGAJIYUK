@@ -11,20 +11,23 @@ class HafalanSetoranController extends Controller
 {
     /**
      * Riwayat setoran.
-     * - Guru: melihat riwayat SEMUA santri (untuk keperluan penilaian & pemantauan).
+     * - Guru: melihat riwayat SEMUA santri.
      * - Santri: hanya melihat riwayat miliknya sendiri.
      */
     public function index()
     {
         $user = auth()->user();
+        $status = request('status');
 
         if ($user->hasRole('guru')) {
             $setorans = HafalanSetoran::with(['santri', 'surah', 'nilai'])
+                ->when($status, fn ($q) => $q->where('status', $status))
                 ->latest()
                 ->paginate(10);
         } else {
             $setorans = HafalanSetoran::with(['surah', 'nilai'])
                 ->where('santri_id', $user->id)
+                ->when($status, fn ($q) => $q->where('status', $status))
                 ->latest()
                 ->paginate(10);
         }
@@ -34,7 +37,6 @@ class HafalanSetoranController extends Controller
 
     /**
      * Detail satu setoran.
-     * Santri hanya boleh melihat setoran miliknya sendiri.
      */
     public function show(HafalanSetoran $setoran)
     {
@@ -50,7 +52,7 @@ class HafalanSetoranController extends Controller
     }
 
     /**
-     * Form setor hafalan baru. Khusus santri (dijaga middleware role:santri di routes).
+     * Form setor hafalan baru. Khusus santri.
      */
     public function create()
     {
@@ -61,9 +63,6 @@ class HafalanSetoranController extends Controller
 
     /**
      * Simpan setoran baru. Khusus santri.
-     * Guru TIDAK PERNAH bisa mencapai method ini karena:
-     * 1. Route ini berada di dalam middleware group role:santri.
-     * 2. Sebagai lapis kedua, kita cek ulang role di sini.
      */
     public function store(Request $request)
     {
@@ -76,7 +75,7 @@ class HafalanSetoranController extends Controller
             'ayat_mulai'   => ['required', 'integer', 'min:1'],
             'ayat_selesai' => ['required', 'integer', 'gte:ayat_mulai'],
             'catatan'      => ['nullable', 'string', 'max:1000'],
-            'audio'        => ['required', 'file', 'max:20480'], // maks 20MB
+            'audio'        => ['required', 'file', 'max:20480'],
         ]);
 
         $path = $request->file('audio')->store('setoran_audio', 'public');
@@ -102,30 +101,29 @@ class HafalanSetoranController extends Controller
     {
         $santriId = auth()->id();
 
-        // Jumlah setoran per bulan
         $setoranPerBulan = HafalanSetoran::where('santri_id', $santriId)
-            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as bulan, COUNT(*) as jumlah")
-            ->groupBy('bulan')
-            ->orderBy('bulan')
-            ->get();
+            ->get()
+            ->groupBy(fn ($item) => $item->created_at->format('Y-m'))
+            ->map(fn ($group, $bulan) => [
+                'bulan'  => $bulan,
+                'jumlah' => $group->count(),
+            ])
+            ->values();
 
-        // Riwayat nilai setiap kali dinilai (untuk grafik perkembangan nilai)
         $nilaiHistory = NilaiHafalan::whereHas('setoran', function ($q) use ($santriId) {
                 $q->where('santri_id', $santriId);
             })
             ->with('setoran.surah')
             ->orderBy('created_at')
             ->get()
-            ->map(function ($n) {
-                return [
-                    'tanggal'     => $n->created_at->format('d M Y'),
-                    'surah'       => $n->setoran->surah->nama_latin ?? '-',
-                    'kelancaran'  => $n->kelancaran,
-                    'tajwid'      => $n->tajwid,
-                    'makhraj'     => $n->makhraj,
-                    'nilai_total' => $n->nilai_total,
-                ];
-            });
+            ->map(fn ($n) => [
+                'tanggal'     => $n->created_at->format('d M Y'),
+                'surah'       => $n->setoran->surah->nama_latin ?? '-',
+                'kelancaran'  => $n->kelancaran,
+                'tajwid'      => $n->tajwid,
+                'makhraj'     => $n->makhraj,
+                'nilai_total' => $n->nilai_total,
+            ]);
 
         return view('setoran.progress', compact('setoranPerBulan', 'nilaiHistory'));
     }
