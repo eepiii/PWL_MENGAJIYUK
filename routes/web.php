@@ -28,7 +28,7 @@ Route::middleware('auth')->group(function () {
 
     // --- QURAN ---
     Route::get('/quran', [QuranController::class, 'index'])->name('quran.index');
-    Route::get('/quran/{nomor_surah}', [QuranController::class, 'show'])->name('quran.show');
+    Route::get('/quran/{nomor}', [QuranController::class, 'show'])->name('quran.show');
 
     // --- SURAH & AYAT ---
     Route::get('/surah', [SurahController::class, 'index'])->name('surah.index');
@@ -40,29 +40,26 @@ Route::middleware('auth')->group(function () {
     Route::get('/jurnal', [JurnalIbadahController::class, 'index'])->name('jurnal.index');
     Route::post('/jurnal', [JurnalIbadahController::class, 'store'])->name('jurnal.store');
 
-    // --- SETORAN (guru & santri) ---
-    // pengecekan role sudah ada di dalam controller masing-masing
-    Route::get('/setoran', [HafalanSetoranController::class, 'index'])->name('setoran.index');
-    Route::get('/setoran/create', [HafalanSetoranController::class, 'create'])->name('setoran.create');
-    Route::post('/setoran', [HafalanSetoranController::class, 'store'])->name('setoran.store');
-    Route::get('/setoran/progress', [NilaiHafalanController::class, 'progress'])->name('setoran.progress');
-    Route::get('/setoran/{setoran}', [HafalanSetoranController::class, 'show'])->name('setoran.show');
-
     // --- FITUR KHUSUS SANTRI ---
+    // (Diletakkan di atas agar route /create terbaca lebih dulu)
     Route::middleware(['role:santri'])->group(function () {
         Route::get('/setoran/create', [HafalanSetoranController::class, 'create'])->name('setoran.create');
         Route::post('/setoran', [HafalanSetoranController::class, 'store'])->name('setoran.store');
-        Route::get('/setoran/progress', [HafalanSetoranController::class, 'progress'])->name('setoran.progress');
+        Route::get('/setoran-progress', [HafalanSetoranController::class, 'progress'])->name('setoran.progress');
     });
 
     // --- FITUR KHUSUS GURU ---
     Route::middleware(['role:guru'])->group(function () {
         Route::get('/penilaian', [NilaiHafalanController::class, 'index'])->name('penilaian.index');
-        Route::post('/penilaian/{id}', [NilaiHafalanController::class, 'store'])->name('penilaian.store');
-
-        Route::get('/setoran/{setoran}/nilai/create', [NilaiHafalanController::class, 'create'])->name('nilai.create');
+        Route::get('/setoran/{setoran}/nilai', [NilaiHafalanController::class, 'create'])->name('nilai.create');
         Route::post('/setoran/{setoran}/nilai', [NilaiHafalanController::class, 'store'])->name('nilai.store');
     });
+
+    // --- SETORAN HAFALAN UMUM ---
+    // (Route index dan show diletakkan paling bawah agar {setoran} tidak menabrak /create)
+    Route::get('/setoran', [HafalanSetoranController::class, 'index'])->name('setoran.index');
+    Route::get('/setoran/{setoran}', [HafalanSetoranController::class, 'show'])->name('setoran.show');
+
 });
 
 require __DIR__.'/auth.php';

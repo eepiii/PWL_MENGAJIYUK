@@ -1,93 +1,108 @@
 @extends('layouts.app')
 
 @section('content')
-<div style="min-height: 80vh; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 20px; padding-bottom: 60px;">
+<style>
+    body { background-color: #fdfbf7; font-family: 'Inter', sans-serif; }
+    .header-surah {
+        background-color: #fcf9f2;
+        border-radius: 16px;
+        padding: 40px;
+        margin-bottom: 30px;
+        border: 1px solid #eee7d5;
+        position: relative;
+        overflow: hidden;
+    }
+    .header-surah::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 6px; height: 100%;
+        background-color: #115e3b;
+    }
+    .btn-back-pill {
+        background: #ffffff; border: 1px solid #e5e7eb; color: #374151;
+        border-radius: 999px; padding: 8px 20px; font-weight: 600;
+        font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+        transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .btn-back-pill:hover { background: #f9fafb; color: #115e3b; border-color: #115e3b; text-decoration: none; }
     
-    <div class="container" style="font-family: 'Segoe UI', Arial, sans-serif; width: 100%; max-width: 1140px; margin: 0 auto;">
-        
-        <div style="margin-bottom: 25px; text-align: left;">
-            <a href="{{ route('quran.index') }}" class="btn btn-default btn-sm" style="border-radius: 20px; font-weight: bold; padding: 8px 18px; border: 1px solid #ccc; background: white; text-decoration: none; color: #333; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                ← Kembali ke Daftar Surah
-            </a>
-        </div>
+    .ayat-card {
+        background: #ffffff; border-radius: 16px; padding: 30px; margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02); border: 1px solid #f0f0f0;
+    }
+    .ayat-number-circle {
+        background-color: #115e3b; color: white; width: 40px; height: 40px;
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 16px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(17,94,59,0.2);
+    }
+    .arab-text {
+        font-family: 'Amiri', serif; font-size: 38px; color: #1f2937;
+        line-height: 2.4; margin: 0; direction: rtl; font-weight: 700;
+    }
+</style>
 
-        <div class="panel panel-default text-center" style="background-color: #0f5132; color: white; border-radius: 12px; border: none; padding: 35px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 30px;">
-            @if(isset($detailSurat['nama']))
-                <h1 style="font-family: 'Amiri', serif; font-weight: bold; margin: 0 0 10px 0; font-size: 46px; color: white; letter-spacing: 1px;">
-                    {{ $detailSurat['nama'] }}
+<div class="container" style="max-width: 900px; margin-top: 30px; margin-bottom: 60px;">
+    
+    <div style="margin-bottom: 20px;">
+        <a href="{{ route('quran.index') }}" class="btn-back-pill">
+            <i class="fa fa-arrow-left"></i> Kembali
+        </a>
+    </div>
+
+    <div class="header-surah">
+        <div style="font-size: 12px; font-weight: 700; color: #9ca3af; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px;">
+            SURAH AL-QUR'AN &bull; {{ $detailSurat['tempatTurun'] ?? 'Mekah' }}
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+            <div>
+                <h1 style="font-size: 36px; font-weight: 800; color: #115e3b; margin: 0 0 5px 0; font-family: 'Amiri', serif;">
+                    {{ $detailSurat['nama'] ?? '' }}
                 </h1>
-                <h3 style="margin: 0 0 10px 0; font-weight: bold; color: white; font-size: 22px;">
-                    {{ $detailSurat['namaLatin'] }}
-                </h3>
-                <p style="color: rgba(255, 255, 255, 0.85); font-style: italic; margin: 0 0 20px 0; font-size: 16px;">
-                    "{{ $detailSurat['arti'] }}"
-                </p>
-                <div style="display: flex; justify-content: center; gap: 10px;">
-                    <span class="label label-warning" style="text-transform: capitalize; font-size: 13px; padding: 6px 14px; background-color: #f0ad4e; border-radius: 4px; font-weight: 600;">
-                        {{ $detailSurat['tempatTurun'] }}
-                    </span>
-                    <span class="label label-warning" style="font-size: 13px; padding: 6px 14px; background-color: #f0ad4e; border-radius: 4px; font-weight: 600;">
-                        {{ $detailSurat['jumlahAyat'] }} Ayat
-                    </span>
+                <h2 style="font-size: 24px; font-weight: 700; color: #1f2937; margin: 0 0 5px 0;">
+                    {{ $detailSurat['namaLatin'] ?? 'Memuat...' }}
+                </h2>
+                <p style="color: #6b7280; font-size: 15px; margin: 0;">"{{ $detailSurat['arti'] ?? '' }}"</p>
+            </div>
+            <div>
+                <div style="background: #115e3b; color: white; padding: 10px 20px; border-radius: 999px; font-weight: 600; font-size: 14px; display: inline-block;">
+                    {{ $detailSurat['jumlahAyat'] ?? '0' }} Ayat
                 </div>
-            @else
-                <h3 style="color: white; margin: 10px 0;">Memuat Data Surah...</h3>
-            @endif
+            </div>
         </div>
+    </div>
 
-        <div style="width: 100%; display: flex; flex-direction: column; gap: 25px;">
-            @if(isset($detailSurat['ayat']) && is_array($detailSurat['ayat']))
-                @foreach($detailSurat['ayat'] as $ayat)
-                    <div class="panel panel-default" style="border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #eef2f5; background: white; margin-bottom: 0; width: 100%;">
-                        <div class="panel-body" style="padding: 35px;">
-                            
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 25px;">
-                                <div style="flex-shrink: 0;">
-                                    <span style="background-color: #0f5132; font-size: 14px; width: 36px; height: 36px; border-radius: 50%; font-weight: bold; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(15,81,50,0.2);">
-                                        {{ $ayat['nomorAyat'] }}
-                                    </span>
-                                </div>
-                                <div style="width: 100%; text-align: right;">
-                                    <h2 style="font-family: 'Amiri', serif; font-weight: bold; color: #222; line-height: 2.5; margin: 0; font-size: 34px; word-spacing: 4px; direction: rtl;">
-                                        {{ $ayat['teksArab'] }}
-                                    </h2>
-                                </div>
-                            </div>
-                            
-                            <hr style="border-top: 1px solid #f8fafc; margin: 20px 0;">
-                            
-                            <div style="text-align: left;">
-                                <p style="color: #2e7d32; font-style: italic; font-size: 15px; margin-bottom: 10px; font-weight: 500; line-height: 1.5;">
-                                    {{ $ayat['teksLatin'] }}
-                                </p>
-                                <p style="color: #444; font-size: 15px; margin-bottom: 0; line-height: 1.8;">
-                                    {{ $ayat['teksIndonesia'] }}
-                                </p>
-                            </div>
-
-                            <hr style="border-top: 1px dashed #eef2f5; margin: 25px 0 15px 0;">
-
-                            <div style="text-align: left;">
-                                <label style="font-size: 11px; font-weight: bold; color: #888; text-transform: uppercase; display: block; margin-bottom: 10px; letter-spacing: 0.8px;">DENGARKAN MUROTTAL:</label>
-                                @if(isset($ayat['audio']['01']))
-                                    <audio controls style="width: 100%; max-width: 450px; height: 36px; display: block;">
-                                        <source src="{{ $ayat['audio']['01'] }}" type="audio/mpeg">
-                                        Browser Anda tidak mendukung pemutar audio.
-                                    </audio>
-                                @else
-                                    <span class="text-muted" style="font-size: 13px; font-style: italic;">Audio tidak tersedia untuk ayat ini.</span>
-                                @endif
-                            </div>
-
+    <div style="display: flex; flex-direction: column; gap: 15px;">
+        @if(isset($detailSurat['ayat']) && is_array($detailSurat['ayat']))
+            @foreach($detailSurat['ayat'] as $ayat)
+                <div class="ayat-card">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 25px; margin-bottom: 25px;">
+                        <div class="ayat-number-circle">{{ $ayat['nomorAyat'] }}</div>
+                        <div style="width: 100%; text-align: right;">
+                            <h2 class="arab-text">{{ $ayat['teksArab'] }}</h2>
                         </div>
                     </div>
-                @endforeach
-            @else
-                <div class="alert alert-danger text-center" style="border-radius: 8px; font-weight: bold; padding: 15px;">
-                    ⚠️ Gagal memuat ayat. Pastikan koneksi internet aktif untuk menarik data dari API Kemenag.
+                    
+                    <hr style="border-top: 1px dashed #e5e7eb; margin: 20px 0;">
+                    
+                    <div>
+                        <p style="color: #115e3b; font-style: italic; font-size: 15px; font-weight: 600; line-height: 1.6; margin-bottom: 8px;">
+                            {{ $ayat['teksLatin'] }}
+                        </p>
+                        <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin-bottom: 0;">
+                            {{ $ayat['teksIndonesia'] }}
+                        </p>
+                    </div>
+
+                    @if(isset($ayat['audio']['01']))
+                        <div style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #f3f4f6;">
+                            <audio controls style="width: 100%; height: 40px; outline: none;">
+                                <source src="{{ $ayat['audio']['01'] }}" type="audio/mpeg">
+                            </audio>
+                        </div>
+                    @endif
                 </div>
-            @endif
-        </div>
+            @endforeach
+        @endif
     </div>
 </div>
 @endsection
