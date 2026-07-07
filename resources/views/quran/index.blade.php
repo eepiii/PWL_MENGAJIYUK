@@ -1,23 +1,105 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container" style="margin-top: 30px; margin-bottom: 50px;">
-    <div class="row" style="margin-bottom: 40px;">
-        <div class="col-md-12 text-center">
-            <h1 style="font-weight: bold; color: #0f5132; margin-bottom: 10px;">
-                <i class="fa fa-quran" style="margin-right: 10px;"></i> Al-Qur'an Digital
-            </h1>
-            <p class="text-muted" style="font-size: 16px;">
-                Silakan pilih surah di bawah ini untuk mulai membaca dan mentadabburi ayat-ayat-Nya.
-            </p>
-            <hr style="border-top: 2px solid #0f5132; width: 80px; margin: 20px auto;">
-        </div>
+<style>
+    /* Global Background untuk kesan hangat/krem seperti referensi */
+    body { background-color: #fdfbf7; font-family: 'Inter', 'Segoe UI', sans-serif; }
+    
+    .quran-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    .quran-title {
+        font-weight: 800;
+        color: #115e3b;
+        font-size: 32px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+    }
+    .surah-card {
+        background-color: #ffffff;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        border: 1px solid #f0f0f0;
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .surah-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(17, 94, 59, 0.08);
+        border-color: #e5e7eb;
+    }
+    .surah-number {
+        background-color: #115e3b;
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 13px;
+    }
+    .surah-arab {
+        font-family: 'Amiri', serif;
+        font-size: 28px;
+        font-weight: 700;
+        color: #115e3b;
+        margin: 0;
+    }
+    .ayat-badge {
+        background-color: #115e3b;
+        color: white;
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: 600;
+        display: inline-block;
+        margin-top: 10px;
+    }
+    .btn-buka-surah {
+        background-color: #115e3b;
+        color: white;
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 12px;
+        width: 100%;
+        text-align: center;
+        border: none;
+        transition: background 0.2s;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: auto;
+    }
+    .btn-buka-surah:hover {
+        background-color: #0e4b2f;
+        color: white;
+        text-decoration: none;
+    }
+</style>
+
+<div class="container" style="margin-top: 40px; margin-bottom: 60px; max-width: 1100px;">
+    
+    <div class="quran-header">
+        <h1 class="quran-title">
+            <i class="fa fa-book-quran"></i> Al-Qur'an Digital
+        </h1>
+        <p style="color: #6b7280; font-size: 16px;">
+            Silakan pilih surah di bawah ini untuk mulai membaca dan mentadabburi ayat-ayat-Nya.
+        </p>
+        <hr style="border-top: 2px solid #115e3b; width: 60px; margin: 20px auto; border-radius: 2px;">
     </div>
 
     <div class="row">
         @foreach ($surah as $item)
             @php
-                // Pastikan $item jadi object biar bisa akses -> dengan aman
                 $item = (object) $item;
                 $nomor     = $item->nomor ?? null;
                 $nama      = $item->nama ?? '';
@@ -26,44 +108,28 @@
                 $jumlahAyat = $item->jumlahAyat ?? 0;
             @endphp
 
-            <div class="col-md-4" style="margin-bottom: 30px;">
-                <div class="panel panel-default" style="border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); border: none; transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;"
-                    onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.12)';"
-                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.06)';">
-
-                    <div class="panel-body" style="padding: 25px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <div style="background-color: #0f5132; color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">
-                                {{ $nomor }}
-                            </div>
-                            @if($nama)
-                                <h2 style="font-family: 'Amiri', serif; font-weight: bold; color: #0f5132; margin: 0; font-size: 28px; line-height: 1;">
-                                    {{ $nama }}
-                                </h2>
-                            @endif
-                        </div>
-
-                        <div style="margin-bottom: 20px; border-top: 1px solid #eee; padding-top: 15px;">
-                            <h4 style="font-weight: bold; color: #333; margin-bottom: 3px;">
-                                {{ $namaLatin }}
-                            </h4>
-                            <p class="text-muted" style="margin-bottom: 8px; font-size: 13px; font-style: italic;">
-                                "{{ $arti }}"
-                            </p>
-                            <span class="label label-success" style="background-color: #157347; font-weight: normal; font-size: 11px;">
-                                {{ $jumlahAyat }} Ayat
-                            </span>
-                        </div>
-
-                        <div style="margin-top: 15px;">
-                            <a href="{{ route('quran.show', $nomor) }}"
-                               class="btn btn-block btn-primary"
-                               style="background-color: #0f5132; border-color: #0f5132; font-weight: bold; border-radius: 6px; padding: 10px 15px; font-size: 14px;">
-                                Buka Surah <i class="fa fa-arrow-right" style="margin-left: 8px;"></i>
-                            </a>
-                        </div>
+            <div class="col-md-4 col-sm-6" style="margin-bottom: 24px;">
+                <div class="surah-card">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                        <div class="surah-number">{{ $nomor }}</div>
+                        <h2 class="surah-arab">{{ $nama }}</h2>
                     </div>
 
+                    <div style="border-top: 1px solid #f3f4f6; padding-top: 15px; margin-bottom: 20px;">
+                        <h4 style="font-weight: 700; color: #1f2937; margin: 0 0 4px 0; font-size: 18px;">
+                            {{ $namaLatin }}
+                        </h4>
+                        <p style="color: #6b7280; font-size: 13px; font-style: italic; margin: 0;">
+                            "{{ $arti }}"
+                        </p>
+                        <div class="ayat-badge">{{ $jumlahAyat }} Ayat</div>
+                    </div>
+
+                    <a href="{{ route('quran.show', $nomor) }}" class="btn-buka-surah">
+                        Buka Surah <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
+                    </a>
+                    
                 </div>
             </div>
         @endforeach
