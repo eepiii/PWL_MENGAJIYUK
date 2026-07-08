@@ -132,7 +132,7 @@
                     
                 </div>
             </div>
-        @endforeach
+        </div>
     </div>
 </div>
 @endsection

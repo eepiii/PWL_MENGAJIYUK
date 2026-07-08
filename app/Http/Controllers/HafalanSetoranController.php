@@ -6,104 +6,98 @@ use App\Models\HafalanSetoran;
 use App\Models\NilaiHafalan;
 use App\Models\Surah;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HafalanSetoranController extends Controller
 {
+    public function create()
+    {
+        // Cegah guru masuk ke halaman form setoran
+        if (Auth::user()->role !== 'santri') {
+            abort(403, 'Maaf, hanya santri yang bisa menyetor hafalan.');
+        }
+
+        return view('setoran.create');
+    }
+
     public function index()
     {
-        $user = auth()->user();
-        $status = request('status');
-
-        // Pengecekan disesuaikan untuk demo agar tetap bisa menampilkan data
-        if ($user->hasRole('guru')) {
-            $setorans = HafalanSetoran::with(['santri', 'surah', 'nilai'])
-                ->when($status, fn ($q) => $q->where('status', $status))
-                ->latest()
-                ->paginate(10);
-        } else {
-            $setorans = HafalanSetoran::with(['surah', 'nilai'])
-                ->where('santri_id', $user->id)
-                ->when($status, fn ($q) => $q->where('status', $status))
-                ->latest()
-                ->paginate(10);
+        // Jika yang login adalah GURU, tampilkan SEMUA setoran dari semua santri
+        if (Auth::user()->role === 'guru') {
+            $setorans = HafalanSetoran::with('santri') // 'santri' adalah relasi ke tabel User
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } 
+        // Jika yang login adalah SANTRI, tampilkan hanya riwayat setorannya sendiri
+        else {
+            $setorans = HafalanSetoran::where('santri_id', Auth::id())
+                ->orderBy('created_at', 'desc')
+                ->get();
         }
 
         return view('setoran.index', compact('setorans'));
     }
 
-    public function show(HafalanSetoran $setoran)
-    {
-        // Pengecekan role dihilangkan sementara agar demo tidak terblokir
-        $setoran->load(['surah', 'santri', 'nilai.guru']);
-
-        return view('setoran.show', compact('setoran'));
-    }
-
-    public function create()
-    {
-        $surahs = Surah::orderBy('nomor_surah')->get();
-        return view('setoran.create', compact('surahs'));
-    }
-
     public function store(Request $request)
     {
-        // Pengecekan role diubah menjadi cek apakah user login saja
-        if (!auth()->check()) {
-            abort(403, 'Anda harus login untuk menyetor hafalan.');
+        // Double safety, walau sudah dibatasi middleware role
+        abort_unless(Auth::user()->role === 'santri', 403);
+
+        // Menggabungkan validasi untuk input teks dan file audio
+        $validated = $request->validate([
+            'surah'        => 'required|string|max:255',
+            'ayat_mulai'   => 'nullable|integer|min:1',
+            'ayat_selesai' => 'nullable|integer|gte:ayat_mulai',
+            'audio'        => [
+                'nullable', // Dibuat nullable agar form tanpa audio tetap bisa jalan, ubah ke 'required' jika wajib
+                'file',
+                'max:20480', // 20MB
+                'mimetypes:audio/webm,audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/ogg',
+            ],
+            'catatan'      => 'nullable|string',
+        ]);
+
+        // Cek dan simpan file audio jika ada
+        $path = null;
+        if ($request->hasFile('audio')) {
+            $path = $request->file('audio')->store('rekaman_hafalan', 'public');
         }
 
-        $validated = $request->validate([
-            'surah_id'     => ['required', 'exists:surahs,id'],
-            'ayat_mulai'   => ['required', 'integer', 'min:1'],
-            'ayat_selesai' => ['required', 'integer', 'gte:ayat_mulai'],
-            'catatan'      => ['nullable', 'string', 'max:1000'],
-            'audio'        => ['required', 'file', 'max:20480'],
+        // Simpan data setoran ke database
+        $setoran = HafalanSetoran::create([
+            'santri_id'       => Auth::id(),
+            'surah'           => $validated['surah'],
+            'ayat_mulai'      => $validated['ayat_mulai'] ?? null,
+            'ayat_selesai'    => $validated['ayat_selesai'] ?? null,
+            'audio_path'      => $path,
+            'catatan'         => $validated['catatan'] ?? null,
+            'tanggal_setoran' => now(),
+            'status'          => 'belum_dinilai',
         ]);
 
-        $path = $request->file('audio')->store('setoran_audio', 'public');
+        // Jika request dikirim via API / AJAX (mengharapkan JSON)
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Setoran berhasil dikirim.',
+                'data'    => $setoran,
+            ]);
+        }
 
-        HafalanSetoran::create([
-            'santri_id'    => auth()->id(),
-            'surah_id'     => $validated['surah_id'],
-            'ayat_mulai'   => $validated['ayat_mulai'],
-            'ayat_selesai' => $validated['ayat_selesai'],
-            'audio_path'   => $path,
-            'catatan'      => $validated['catatan'] ?? null,
-            'status'       => 'menunggu',
-        ]);
-
-        return redirect()->route('setoran.index')
-            ->with('success', 'Setoran hafalan berhasil dikirim.');
+        // Jika request dikirim via Form HTML biasa
+        return redirect()->route('setoran.index')->with('success', 'Setoran berhasil dikirim.');
     }
 
-    public function progress()
+    public function show(HafalanSetoran $setoran)
     {
-        $santriId = auth()->id();
+        $user = Auth::user();
 
-        $setoranPerBulan = HafalanSetoran::where('santri_id', $santriId)
-            ->get()
-            ->groupBy(fn ($item) => $item->created_at->format('Y-m'))
-            ->map(fn ($group, $bulan) => [
-                'bulan'  => $bulan,
-                'jumlah' => $group->count(),
-            ])
-            ->values();
+        // Santri hanya boleh lihat setorannya sendiri
+        if ($user->role === 'santri' && $setoran->santri_id !== $user->id) {
+            abort(403);
+        }
 
-        $nilaiHistory = NilaiHafalan::whereHas('setoran', function ($q) use ($santriId) {
-                $q->where('santri_id', $santriId);
-            })
-            ->with('setoran.surah')
-            ->orderBy('created_at')
-            ->get()
-            ->map(fn ($n) => [
-                'tanggal'     => $n->created_at->format('d M Y'),
-                'surah'       => $n->setoran->surah->nama_latin ?? '-',
-                'kelancaran'  => $n->kelancaran,
-                'tajwid'      => $n->tajwid,
-                'makhraj'     => $n->makhraj,
-                'nilai_total' => $n->nilai_total,
-            ]);
+        $setoran->load('nilaiHafalan'); // relasi ke nilai
 
-        return view('setoran.progress', compact('setoranPerBulan', 'nilaiHistory'));
+        return view('setoran.show', compact('setoran'));
     }
 }

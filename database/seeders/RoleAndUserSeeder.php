@@ -19,10 +19,10 @@ class RoleAndUserSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'grade setoran']);
 
         $guruRole = Role::firstOrCreate(['name' => 'guru']);
-        $guruRole->givePermissionTo(['view dashboard', 'read quran', 'view setoran', 'grade setoran']);
+        $guruRole->syncPermissions(['view dashboard', 'read quran', 'view setoran', 'grade setoran']);
 
         $santriRole = Role::firstOrCreate(['name' => 'santri']);
-        $santriRole->givePermissionTo(['view dashboard', 'read quran', 'view setoran', 'create setoran']);
+        $santriRole->syncPermissions(['view dashboard', 'read quran', 'view setoran', 'create setoran']);
 
         $guru = User::firstOrCreate(
             ['email' => 'guru@mengajiyuk.com'],
@@ -35,5 +35,7 @@ class RoleAndUserSeeder extends Seeder
             ['name' => 'Santri Ali', 'password' => Hash::make('password123')]
         );
         $santri->assignRole($santriRole);
+        
+        // HAPUS blok $this->call di sini!
     }
 }

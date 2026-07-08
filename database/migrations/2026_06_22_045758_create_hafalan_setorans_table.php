@@ -6,7 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+   public function up(): void
+{
+    Schema::create('hafalan_setorans', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('santri_id')->constrained('users')->onDelete('cascade');
+        $table->string('surah');
+        $table->string('audio_path');
+        $table->text('catatan')->nullable();
+        $table->timestamps();
+    });
+}
+    public function down(): void
     {
         Schema::create('hafalan_setorans', function (Blueprint $table) {
             $table->id();
