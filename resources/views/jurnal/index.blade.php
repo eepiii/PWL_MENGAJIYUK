@@ -2,11 +2,11 @@
 
 @section('content')
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=Amiri:wght@400;700&display=swap');
 
     .jurnal-wrap { max-width: 780px; margin: 50px auto; padding: 0 20px 80px; font-family: 'Inter', sans-serif; }
     .jurnal-breadcrumb { font-size: 11px; letter-spacing: 2px; color: #999; text-transform: uppercase; margin-bottom: 8px; }
-    .jurnal-title { font-family: 'Playfair Display', serif; font-size: 32px; color: #1a3a2a; margin: 0 0 6px; }
+    .jurnal-title { font-family: 'Amiri', serif; font-size: 38px; color: #1a3a2a; margin: 0 0 6px; font-weight: 700; }
     .jurnal-subtitle { font-size: 14px; color: #888; margin-bottom: 30px; }
     .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
     .filter-btn { border: 1.5px solid #1a3a2a; border-radius: 30px; padding: 6px 18px; font-size: 13px; font-weight: 600; cursor: pointer; background: transparent; color: #1a3a2a; transition: all 0.2s; }
@@ -16,7 +16,7 @@
     .shalat-card { background: white; border-radius: 4px; padding: 20px 24px; margin-bottom: 2px; border-left: 3px solid transparent; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
     .shalat-card.done { border-left-color: #1a3a2a; background: #f9fdf9; }
     .shalat-card.absen { border-left-color: #e5e5e5; }
-    .shalat-name { font-family: 'Playfair Display', serif; font-size: 17px; color: #1a3a2a; font-weight: 600; margin: 0; }
+    .shalat-name { font-family: 'Amiri', serif; font-size: 20px; color: #1a3a2a; font-weight: 700; margin: 0; }
     .shalat-time { font-size: 12px; color: #888; margin: 2px 0 0; }
     .badge-status { font-size: 10px; letter-spacing: 1px; font-weight: 700; padding: 4px 12px; border-radius: 30px; text-transform: uppercase; }
     .badge-tepat { background: #1a3a2a; color: white; }
