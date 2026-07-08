@@ -2,17 +2,11 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
-
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
 
 class User extends Authenticatable
 {
@@ -54,28 +48,23 @@ class User extends Authenticatable
     // Relasi
     // =====================
 
-    // Santri memiliki banyak setoran hafalan
     public function setoranHafalan()
     {
         return $this->hasMany(HafalanSetoran::class, 'santri_id');
     }
 
-    // Guru memiliki banyak penilaian yang diberikan
     public function nilaiYangDiberikan()
     {
         return $this->hasMany(NilaiHafalan::class, 'guru_id');
     }
 
-    // Santri memiliki banyak nilai yang diterima
     public function nilaiHafalan()
     {
         return $this->hasMany(NilaiHafalan::class, 'santri_id');
     }
 
-    // Santri memiliki banyak jurnal ibadah
     public function jurnalIbadah()
     {
         return $this->hasMany(JurnalIbadah::class, 'santri_id');
     }
 }
-

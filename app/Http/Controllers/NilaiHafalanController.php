@@ -5,13 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\HafalanSetoran;
 use App\Models\NilaiHafalan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class NilaiHafalanController extends Controller
 {
     public function index()
     {
-        $setorans = HafalanSetoran::with(['santri', 'surah'])
-            ->menunggu()
+        abort_unless(Auth::user()->role === 'guru', 403);
+
+        $setorans = HafalanSetoran::with('santri')
+            ->where('status', 'belum_dinilai')
             ->latest()
             ->paginate(10);
 
@@ -20,7 +23,9 @@ class NilaiHafalanController extends Controller
 
     public function create(HafalanSetoran $setoran)
     {
-        if ($setoran->status === 'dinilai') {
+        abort_unless(Auth::user()->role === 'guru', 403);
+
+        if ($setoran->status === 'sudah_dinilai') {
             return redirect()->route('setoran.show', $setoran->id)
                 ->with('info', 'Setoran ini sudah dinilai sebelumnya.');
         }
@@ -30,11 +35,9 @@ class NilaiHafalanController extends Controller
 
     public function store(Request $request, HafalanSetoran $setoran)
     {
-        if (!auth()->user()->hasRole('guru')) {
-            abort(403, 'Hanya guru yang bisa menilai setoran.');
-        }
+        abort_unless(Auth::user()->role === 'guru', 403);
 
-        if ($setoran->status === 'dinilai') {
+        if ($setoran->status === 'sudah_dinilai') {
             return redirect()->route('setoran.show', $setoran->id)
                 ->with('info', 'Setoran ini sudah dinilai sebelumnya.');
         }
@@ -52,7 +55,7 @@ class NilaiHafalanController extends Controller
 
         NilaiHafalan::create([
             'hafalan_setoran_id' => $setoran->id,
-            'guru_id'            => auth()->id(),
+            'guru_id'            => Auth::id(),
             'kelancaran'         => $validated['kelancaran'],
             'tajwid'             => $validated['tajwid'],
             'makhraj'            => $validated['makhraj'],
@@ -60,9 +63,31 @@ class NilaiHafalanController extends Controller
             'catatan'            => $validated['catatan'] ?? null,
         ]);
 
-        $setoran->update(['status' => 'dinilai']);
+        $setoran->update(['status' => 'sudah_dinilai']);
 
-        return redirect()->route('setoran.show', $setoran->id)
+        return redirect()->route('setoran.index')
             ->with('success', 'Penilaian berhasil disimpan.');
+    }
+
+    public function progress()
+    {
+        abort_unless(Auth::user()->role === 'santri', 403);
+
+        $data = HafalanSetoran::where('santri_id', Auth::id())
+            ->with('nilaiHafalan')
+            ->whereHas('nilaiHafalan')
+            ->orderBy('tanggal_setoran')
+            ->get()
+            ->map(function ($setoran) {
+                return [
+                    'tanggal' => $setoran->tanggal_setoran
+                        ? $setoran->tanggal_setoran->format('d M')
+                        : $setoran->created_at->format('d M'),
+                    'surah'   => $setoran->surah,
+                    'nilai'   => $setoran->nilaiHafalan->nilai_total,
+                ];
+            });
+
+        return view('setoran.progress', compact('data'));
     }
 }
