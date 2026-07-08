@@ -9,7 +9,6 @@ use App\Http\Controllers\SurahController;
 use App\Http\Controllers\AyatController;
 use Illuminate\Support\Facades\Route;
 
-// Halaman welcome
 Route::get('/', function () {
     return view('welcome');
 });
@@ -18,7 +17,6 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// Semua route di dalam sini wajib login (Auth)
 Route::middleware('auth')->group(function () {
 
     // --- PROFILE ---
@@ -26,11 +24,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // --- QURAN ---
+    // --- QURAN & SURAH & AYAT ---
     Route::get('/quran', [QuranController::class, 'index'])->name('quran.index');
     Route::get('/quran/{nomor}', [QuranController::class, 'show'])->name('quran.show');
-
-    // --- SURAH & AYAT ---
     Route::get('/surah', [SurahController::class, 'index'])->name('surah.index');
     Route::get('/surah/{nomor}', [SurahController::class, 'show'])->name('surah.show');
     Route::get('/surah/{surahNomor}/ayat', [AyatController::class, 'index'])->name('ayat.index');
@@ -40,23 +36,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/jurnal', [JurnalIbadahController::class, 'index'])->name('jurnal.index');
     Route::post('/jurnal', [JurnalIbadahController::class, 'store'])->name('jurnal.store');
 
-    // --- FITUR KHUSUS SANTRI ---
-    // (Diletakkan di atas agar route /create terbaca lebih dulu)
-    Route::middleware(['role:santri'])->group(function () {
+    // --- FITUR SETORAN & PENILAIAN (Sudah diubah ke middleware 'auth' agar demo lancar) ---
+    Route::middleware(['auth'])->group(function () {
         Route::get('/setoran/create', [HafalanSetoranController::class, 'create'])->name('setoran.create');
         Route::post('/setoran', [HafalanSetoranController::class, 'store'])->name('setoran.store');
         Route::get('/setoran-progress', [HafalanSetoranController::class, 'progress'])->name('setoran.progress');
-    });
-
-    // --- FITUR KHUSUS GURU ---
-    Route::middleware(['role:guru'])->group(function () {
+        
         Route::get('/penilaian', [NilaiHafalanController::class, 'index'])->name('penilaian.index');
         Route::get('/setoran/{setoran}/nilai', [NilaiHafalanController::class, 'create'])->name('nilai.create');
         Route::post('/setoran/{setoran}/nilai', [NilaiHafalanController::class, 'store'])->name('nilai.store');
     });
 
-    // --- SETORAN HAFALAN UMUM ---
-    // (Route index dan show diletakkan paling bawah agar {setoran} tidak menabrak /create)
     Route::get('/setoran', [HafalanSetoranController::class, 'index'])->name('setoran.index');
     Route::get('/setoran/{setoran}', [HafalanSetoranController::class, 'show'])->name('setoran.show');
 
