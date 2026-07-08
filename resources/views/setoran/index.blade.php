@@ -3,90 +3,27 @@
 @section('content')
 @include('partials.ledger-style')
 
-            {{-- Header --}}
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-gray-800">
-                    {{ Auth::user()->role === 'guru' ? 'Semua Setoran Santri' : 'Riwayat Setoran Saya' }}
-                </h2>
+<div class="container" style="max-width: 900px; margin-top: 20px; margin-bottom: 40px;">
+<div class="ledger-page">
 
-                @if(Auth::user()->role === 'santri')
-                    <a href="{{ route('setoran.create') }}"
-                       class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow">
-                        + Tambah Setoran Baru
-                    </a>
-                @endif
+    <div class="lg-header-row">
+        <div>
+            <div class="lg-eyebrow">
+                Buku catatan &middot; {{ auth()->user()->hasRole('guru') ? 'seluruh santri' : auth()->user()->name }}
             </div>
-
-            {{-- Konten --}}
-            @if($setorans->isEmpty())
-                <div class="text-center py-10 bg-gray-50 rounded-lg border border-gray-200">
-                    <p class="text-gray-500 font-semibold mb-2">Belum ada rekaman setoran.</p>
-                    <p class="text-sm text-gray-400">Silakan buat setoran hafalan pertama Anda.</p>
-                </div>
-            @else
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    @foreach($setorans as $setoran)
-                        <div class="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow bg-gray-50">
-
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <h3 class="font-bold text-lg text-indigo-700">
-                                        {{ $setoran->surah }}
-                                    </h3>
-
-                                    @if(Auth::user()->role === 'guru')
-                                        <p class="text-sm font-semibold text-gray-800">
-                                            Santri: {{ $setoran->santri->name }}
-                                        </p>
-                                    @endif
-
-                                    <p class="text-xs text-gray-500">
-                                        {{ $setoran->created_at->format('d M Y - H:i') }} WIB
-                                    </p>
-                                </div>
-
-                                {{-- Status Badge --}}
-                                <span class="text-xs px-3 py-1 rounded-full font-medium
-                                    {{ $setoran->status === 'sudah_dinilai'
-                                        ? 'bg-green-100 text-green-700'
-                                        : 'bg-yellow-100 text-yellow-700' }}">
-                                    {{ $setoran->status === 'sudah_dinilai' ? '✅ Dinilai' : '⏳ Pending' }}
-                                </span>
-                            </div>
-
-                            {{-- Audio --}}
-                            @if($setoran->audio_path)
-                                <div class="my-4">
-                                    <audio controls class="w-full h-10">
-                                        <source src="{{ asset('storage/' . $setoran->audio_path) }}"
-                                                type="audio/webm">
-                                        Browser Anda tidak mendukung pemutar audio ini.
-                                    </audio>
-                                </div>
-                            @endif
-
-                            {{-- Catatan --}}
-                            @if($setoran->catatan)
-                                <div class="bg-white p-3 rounded border border-gray-100 text-sm text-gray-600">
-                                    <span class="font-semibold block mb-1">Catatan:</span>
-                                    {{ $setoran->catatan }}
-                                </div>
-                            @endif
-
-                            {{-- Tombol Nilai (khusus guru) --}}
-                            @if(Auth::user()->role === 'guru')
-                                <div class="mt-4">
-                                    <a href="{{ route('nilai.create', $setoran->id) }}"
-                                       class="bg-blue-600 hover:bg-blue-700 text-white text-sm
-                                              font-semibold py-2 px-4 rounded-lg w-full block text-center">
-                                        {{ $setoran->status === 'sudah_dinilai' ? 'Lihat / Edit Nilai' : 'Beri Nilai' }}
-                                    </a>
-                                </div>
-                            @endif
-
-                        </div>
-                    @endforeach
-                </div>
+            <h1 class="lg-title">Setoran Hafalan</h1>
+            <p class="lg-subtitle">
+                @if(auth()->user()->hasRole('guru'))
+                    Pantau riwayat setoran hafalan santri dan beri penilaian.
+                @else
+                    Rekam bacaanmu, kirim untuk dikoreksi, dan lihat catatan penilaian dari ustadz pembimbing.
+                @endif
+            </p>
+        </div>
+        <div class="lg-actions">
+            @if(auth()->user()->hasRole('santri'))
+                <a href="{{ route('setoran.progress') }}" class="lg-btn lg-btn-ghost">Progress saya</a>
+                <a href="{{ route('setoran.create') }}" class="lg-btn lg-btn-solid">+ Setor hafalan</a>
             @endif
         </div>
     </div>

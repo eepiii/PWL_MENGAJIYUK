@@ -1,28 +1,34 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container" style="max-width:700px;margin-top:30px;margin-bottom:60px;">
-    <a href="{{ route('setoran.index') }}" class="btn btn-default btn-sm" style="border-radius:20px;margin-bottom:20px;">← Kembali ke Riwayat</a>
+@include('partials.ledger-style')
 
-    <div class="panel panel-default" style="border-radius:12px;padding:30px;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
-        <h3 style="margin-top:0;color:#0f5132;font-weight:bold;">Setor Hafalan Baru</h3>
+<div class="container" style="max-width: 700px; margin-top: 20px; margin-bottom: 40px;">
+<div class="ledger-page">
 
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul style="margin-bottom:0;">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+    <a href="{{ route('setoran.index') }}" class="lg-back">&larr; Kembali ke riwayat</a>
 
+    <div class="lg-eyebrow">Setoran baru</div>
+    <h1 class="lg-title" style="font-size: 26px;">Setor Hafalan</h1>
+    <p class="lg-subtitle" style="margin-bottom: 24px;">Pilih surah dan rentang ayat, lalu rekam bacaanmu langsung dari browser.</p>
+
+    @if ($errors->any())
+        <div class="lg-alert lg-alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <div class="lg-section">
         <form id="formSetoran" action="{{ route('setoran.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
-            <div class="form-group">
-                <label>Surah</label>
-                <select name="surah_id" class="form-control" required>
+            <div class="lg-form-group">
+                <label class="lg-field-label">Surah</label>
+                <select name="surah_id" class="lg-input" required>
                     <option value="">-- Pilih Surah --</option>
                     @foreach ($surahs as $surah)
                         <option value="{{ $surah->id }}" {{ old('surah_id') == $surah->id ? 'selected' : '' }}>
@@ -32,51 +38,36 @@
                 </select>
             </div>
 
-            <div class="row">
-                <div class="col-sm-6">
-                    <div class="form-group">
-                        <label>Ayat Mulai</label>
-                        <input type="number" name="ayat_mulai" class="form-control" min="1" value="{{ old('ayat_mulai') }}" required>
-                    </div>
+            <div class="lg-form-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="lg-form-group">
+                    <label class="lg-field-label">Ayat mulai</label>
+                    <input type="number" name="ayat_mulai" class="lg-input" min="1" value="{{ old('ayat_mulai') }}" required>
                 </div>
-                <div class="col-sm-6">
-                    <div class="form-group">
-                        <label>Ayat Selesai</label>
-                        <input type="number" name="ayat_selesai" class="form-control" min="1" value="{{ old('ayat_selesai') }}" required>
-                    </div>
+                <div class="lg-form-group">
+                    <label class="lg-field-label">Ayat selesai</label>
+                    <input type="number" name="ayat_selesai" class="lg-input" min="1" value="{{ old('ayat_selesai') }}" required>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Catatan (opsional)</label>
-                <textarea name="catatan" class="form-control" rows="2" placeholder="Contoh: sudah muroja'ah 3x sebelum setor">{{ old('catatan') }}</textarea>
+            <div class="lg-form-group">
+                <label class="lg-field-label">Catatan (opsional)</label>
+                <textarea name="catatan" class="lg-input" rows="2" placeholder="Contoh: sudah muroja'ah 3x sebelum setor">{{ old('catatan') }}</textarea>
             </div>
 
-            <hr>
-
-            <div class="form-group text-center">
-                <label style="display:block;font-weight:bold;color:#555;">Rekam Bacaan Hafalan</label>
-
-                <div style="margin:15px 0;">
-                    <button type="button" id="btnRecord" class="btn btn-danger" style="border-radius:30px;padding:10px 25px;font-weight:bold;">
-                        <i class="fa fa-microphone"></i> Mulai Rekam
-                    </button>
-                    <button type="button" id="btnStop" class="btn btn-default" style="border-radius:30px;padding:10px 25px;font-weight:bold;display:none;">
-                        <i class="fa fa-stop"></i> Berhenti
-                    </button>
+            <div class="lg-record-box">
+                <div id="recordControls">
+                    <button type="button" id="btnRecord" class="lg-mic-btn">Mulai rekam</button>
                 </div>
-
-                <p id="statusRekam" style="color:#888;font-size:13px;"></p>
-
-                <audio id="previewAudio" controls style="display:none;width:100%;margin-top:10px;"></audio>
+                <p class="lg-record-hint" id="statusRekam">Rekam bacaan hafalanmu sebelum mengirim setoran.</p>
+                <audio id="previewAudio" controls style="display:none;"></audio>
                 <input type="file" name="audio" id="audioInput" style="display:none;" accept="audio/*">
             </div>
 
-            <button type="submit" id="btnSubmit" class="btn btn-success btn-block" style="border-radius:30px;padding:12px;font-weight:bold;background-color:#0f5132;border-color:#0f5132;color:white;" disabled>
-                Kirim Setoran
-            </button>
+            <button type="submit" id="btnSubmit" class="lg-btn lg-btn-solid lg-btn-block" disabled>Kirim setoran</button>
         </form>
     </div>
+
+</div>
 </div>
 
 <script>
@@ -85,15 +76,13 @@
     let recordedBlob = null;
 
     const btnRecord = document.getElementById('btnRecord');
-    const btnStop = document.getElementById('btnStop');
     const btnSubmit = document.getElementById('btnSubmit');
     const statusRekam = document.getElementById('statusRekam');
     const preview = document.getElementById('previewAudio');
     const form = document.getElementById('formSetoran');
 
-    btnRecord.addEventListener('click', async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    function startRecording() {
+        navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
             chunks = [];
             mediaRecorder = new MediaRecorder(stream);
 
@@ -103,25 +92,29 @@
                 preview.src = URL.createObjectURL(recordedBlob);
                 preview.style.display = 'block';
                 btnSubmit.disabled = false;
-                statusRekam.innerText = 'Rekaman selesai. Silakan dengarkan sebelum mengirim.';
+                statusRekam.innerText = 'Rekaman selesai. Dengarkan dulu sebelum mengirim.';
                 stream.getTracks().forEach(track => track.stop());
+
+                btnRecord.innerText = 'Rekam ulang';
+                btnRecord.classList.remove('lg-recording');
+                btnRecord.onclick = startRecording;
             };
 
             mediaRecorder.start();
-            btnRecord.style.display = 'none';
-            btnStop.style.display = 'inline-block';
+            btnRecord.innerText = 'Berhenti merekam';
+            btnRecord.classList.add('lg-recording');
+            btnRecord.onclick = stopRecording;
             statusRekam.innerText = 'Sedang merekam...';
-        } catch (err) {
+        }).catch(() => {
             alert('Tidak bisa mengakses mikrofon. Pastikan izin mic diaktifkan di browser.');
-        }
-    });
+        });
+    }
 
-    btnStop.addEventListener('click', () => {
-        mediaRecorder.stop();
-        btnStop.style.display = 'none';
-        btnRecord.style.display = 'inline-block';
-        btnRecord.innerHTML = '<i class="fa fa-microphone"></i> Rekam Ulang';
-    });
+    function stopRecording() {
+        if (mediaRecorder) mediaRecorder.stop();
+    }
+
+    btnRecord.onclick = startRecording;
 
     form.addEventListener('submit', (e) => {
         if (!recordedBlob) {
