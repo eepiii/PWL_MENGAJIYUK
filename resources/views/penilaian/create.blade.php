@@ -6,75 +6,51 @@
 <div class="container" style="max-width: 650px; margin-top: 20px; margin-bottom: 40px;">
 <div class="ledger-page">
 
-    <a href="{{ route('setoran.index') }}" class="lg-back">&larr; Kembali</a>
+    <a href="{{ route('setoran.show', $setoran->id) }}" class="lg-back">&larr; Kembali</a>
 
-    <div class="lg-eyebrow">Beri Penilaian</div>
-    <p class="lg-surah-name" style="font-size: 26px;">{{ $setoran->surah }}</p>
-    <p class="lg-subtitle" style="margin-bottom: 20px;">
-        Santri: <b>{{ $setoran->santri->name }}</b> ·
-        {{ $setoran->created_at->format('d M Y') }}
-    </p>
+    <div class="lg-eyebrow">Beri penilaian</div>
+    <p class="lg-surah-name" style="font-size: 26px;">{{ $setoran->surah->nama_latin ?? '-' }} : {{ $setoran->ayat_mulai }}-{{ $setoran->ayat_selesai }}</p>
+    <p class="lg-subtitle" style="margin-bottom: 20px;">Santri: <b>{{ $setoran->santri->name }}</b></p>
 
     <div class="lg-section">
+        <audio controls>
+            <source src="{{ asset('storage/' . $setoran->audio_path) }}" type="audio/webm">
+        </audio>
 
-        {{-- Audio --}}
-        @if($setoran->audio_path)
-            <audio controls style="width: 100%; margin-bottom: 20px;">
-                <source src="{{ asset('storage/' . $setoran->audio_path) }}" type="audio/webm">
-            </audio>
-        @endif
-
-        {{-- Error --}}
-        @if($errors->any())
+        @if ($errors->any())
             <div class="lg-alert lg-alert-danger">
                 <ul>
-                    @foreach($errors->all() as $error)
+                    @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
                 </ul>
             </div>
         @endif
 
-        <form action="{{ route('nilai.store', $setoran->id) }}" method="POST">
+        <form action="{{ route('nilai.store', $setoran->id) }}" method="POST" style="margin-top: 16px;">
             @csrf
 
             <div class="lg-form-group">
                 <label class="lg-field-label">Kelancaran (0-100)</label>
-                <input type="number" name="kelancaran" id="kelancaran"
-                    class="lg-input nilai-input"
-                    min="0" max="100"
-                    value="{{ old('kelancaran') }}" required>
+                <input type="number" name="kelancaran" id="kelancaran" class="lg-input nilai-input" min="0" max="100" value="{{ old('kelancaran') }}" required>
             </div>
-
             <div class="lg-form-group">
                 <label class="lg-field-label">Tajwid (0-100)</label>
-                <input type="number" name="tajwid" id="tajwid"
-                    class="lg-input nilai-input"
-                    min="0" max="100"
-                    value="{{ old('tajwid') }}" required>
+                <input type="number" name="tajwid" id="tajwid" class="lg-input nilai-input" min="0" max="100" value="{{ old('tajwid') }}" required>
             </div>
-
             <div class="lg-form-group">
                 <label class="lg-field-label">Makhraj (0-100)</label>
-                <input type="number" name="makhraj" id="makhraj"
-                    class="lg-input nilai-input"
-                    min="0" max="100"
-                    value="{{ old('makhraj') }}" required>
+                <input type="number" name="makhraj" id="makhraj" class="lg-input nilai-input" min="0" max="100" value="{{ old('makhraj') }}" required>
             </div>
 
-            <div class="lg-total-preview">
-                Nilai akhir (otomatis): <span id="previewTotal">0</span>
-            </div>
+            <div class="lg-total-preview">Nilai akhir (otomatis): <span id="previewTotal">0</span></div>
 
             <div class="lg-form-group">
-                <label class="lg-field-label">Catatan untuk Santri (opsional)</label>
-                <textarea name="catatan" class="lg-input" rows="3"
-                    placeholder="Masukan atau saran untuk santri...">{{ old('catatan') }}</textarea>
+                <label class="lg-field-label">Catatan untuk santri</label>
+                <textarea name="catatan" class="lg-input" rows="3">{{ old('catatan') }}</textarea>
             </div>
 
-            <button type="submit" class="lg-btn lg-btn-solid lg-btn-block">
-                Simpan Penilaian
-            </button>
+            <button type="submit" class="lg-btn lg-btn-solid lg-btn-block">Simpan nilai</button>
         </form>
     </div>
 
