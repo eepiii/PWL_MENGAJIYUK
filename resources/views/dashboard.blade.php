@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <div class="container" style="margin-top: 30px; margin-bottom: 50px; max-width: 1140px; font-family: 'Segoe UI', Arial, sans-serif;">
+
     <div class="text-center" style="background-color: #0f5132; color: white; border-radius: 12px; padding: 50px 20px; margin-bottom: 40px; box-shadow: 0 4px 15px rgba(15,81,50,0.1);">
         <h1 style="font-size: 38px; font-weight: bold; margin-bottom: 15px; font-family: 'Georgia', serif;">
             Selamat Datang di MengajiYuk!
@@ -17,27 +18,11 @@
     </div>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 40px;">
+
         <div class="card-menu" style="background: white; border: 1px solid #eef2f5; border-radius: 12px; padding: 35px 25px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; min-height: 280px;">
             <div>
                 <div style="color: #0f5132; font-size: 40px; margin-bottom: 15px;">
                     <i class="fa-solid fa-book-quran"></i>
-                </div>
-                <h3 style="font-weight: bold; color: #222; margin: 0 0 10px 0; font-size: 20px;">Al-Qur'an Digital</h3>
-                <p style="color: #666; font-size: 14px; line-height: 1.6; margin: 0 0 20px 0;">
-                    Baca Al-Qur'an lengkap dengan teks Arab, transliterasi latin, dan terjemahan bahasa Indonesia resmi.
-                </p>
-            </div>
-            <div>
-                <a href="/quran" class="btn" style="border: 1px solid #ccc; background: white; color: #333; font-weight: bold; padding: 8px 24px; border-radius: 6px; text-decoration: none; font-size: 13px; display: inline-block;">
-                    Buka Qur'an
-                </a>
-            </div>
-        </div>
-
-        <div class="card-menu" style="background: white; border: 1px solid #eef2f5; border-radius: 12px; padding: 35px 25px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; min-height: 280px;">
-            <div>
-                <div style="color: #f39c12; font-size: 40px; margin-bottom: 15px;">
-                    <i class="fa-solid fa-microphone"></i>
                 </div>
                 <h3 style="font-weight: bold; color: #222; margin: 0 0 10px 0; font-size: 20px;">Al-Qur'an Digital</h3>
                 <p style="color: #666; font-size: 14px; line-height: 1.6; margin: 0 0 20px 0;">
