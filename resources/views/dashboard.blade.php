@@ -7,7 +7,7 @@
 
     <div class="text-center" style="background-color: #0f5132; color: white; border-radius: 12px; padding: 50px 20px; margin-bottom: 40px; box-shadow: 0 4px 15px rgba(15,81,50,0.1);">
         <h1 style="font-size: 38px; font-weight: bold; margin-bottom: 15px; font-family: 'Georgia', serif;">
-            Selamat Datang di MengajiYuk!
+            Selamat Datang di MengajiYuk Kelompok 2!
         </h1>
         <p style="font-size: 16px; opacity: 0.9; max-width: 700px; margin: 0 auto 25px auto; line-height: 1.6;">
             Platform digital pendukung hafalan santri, jurnal ibadah, dan pembelajaran Al-Qur'an interaktif.
