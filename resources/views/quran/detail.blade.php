@@ -162,7 +162,7 @@
 </div>
 
 <script>
-
+    // SCRIPT LOGIC TETAP SAMA SEPERTI SEBELUMNYA
     let ayatAktif = '';
     let teksAsliArab = '';
     let recognition;
